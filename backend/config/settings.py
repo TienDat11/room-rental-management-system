@@ -10,7 +10,10 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = os.environ.get("DEBUG", "True").lower() == "true"
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+_raw_allowed = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1")
+ALLOWED_HOSTS = [h.strip() for h in _raw_allowed.split(",") if h.strip()]
+# Django uses ".domain.com" (leading dot) for subdomain matching, not "*.domain.com"
+ALLOWED_HOSTS = [h.replace("*.", ".") if h.startswith("*.") else h for h in ALLOWED_HOSTS]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
