@@ -32,6 +32,7 @@ class RegisterView(viewsets.GenericViewSet):
 class MeView(viewsets.GenericViewSet):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
+    queryset = User.objects.none()
 
     @extend_schema(description="Get current user profile")
     def list(self, request):
