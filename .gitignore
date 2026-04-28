@@ -75,13 +75,29 @@ coverage.xml
 
 # Documents (không đẩy lên git)
 *.docx
+*.doc
 *.pdf
+*.pptx
+*.ppt
+*.xlsx
+*.xls
+docs/
+documents/
+spec/
+reports/
 spec_*.md
 task_board_*.md
-*.pptx
+*.md
+!README.md
+!CLAUDE.md
 
-# OMC
+# Secrets
+*.pem
+*.key
+
+# OMC & Claude
 .omc/
+.claude/
 
 # Test
 .pytest_cache/
