@@ -40,7 +40,7 @@ class TenantViewSet(viewsets.ModelViewSet):
         if user.is_landlord:
             return Tenant.objects.filter(landlord=user)
         if user.is_tenant:
-            return Tenant.objects.filter(room__tenant=user)
+            return Tenant.objects.filter(user=user)
         return Tenant.objects.none()
 
     def perform_create(self, serializer):

@@ -11,6 +11,7 @@ class Tenant(models.Model):
     address = models.TextField(blank=True)
     emergency_contact = models.CharField(max_length=150, blank=True)
     room = models.OneToOneField("rooms.Room", on_delete=models.SET_NULL, null=True, blank=True, related_name="tenant")
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="tenant_profile")
     status = models.CharField(max_length=10, choices=[("ACTIVE", "Active"), ("INACTIVE", "Inactive")], default="ACTIVE")
     notes = models.TextField(blank=True)
     landlord = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="tenants")

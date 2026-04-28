@@ -35,7 +35,7 @@ class ContractViewSet(viewsets.ModelViewSet):
         if user.is_landlord:
             return Contract.objects.filter(landlord=user)
         if user.is_tenant:
-            return Contract.objects.filter(tenant__room__tenant=user)
+            return Contract.objects.filter(tenant__user=user)
         return Contract.objects.none()
 
     def perform_create(self, serializer):

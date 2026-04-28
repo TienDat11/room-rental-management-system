@@ -26,6 +26,8 @@ class BillViewSet(viewsets.ModelViewSet):
             return BillCreateSerializer
         elif self.action in ["update", "partial_update"]:
             return BillUpdateSerializer
+        elif self.action == "pay":
+            return PaymentCreateSerializer
         return BillSerializer
 
     def get_queryset(self):
@@ -35,7 +37,7 @@ class BillViewSet(viewsets.ModelViewSet):
         if user.is_landlord:
             return Bill.objects.filter(room__landlord=user)
         if user.is_tenant:
-            return Bill.objects.filter(tenant__room__tenant=user)
+            return Bill.objects.filter(tenant__user=user)
         return Bill.objects.none()
 
     @extend_schema(
@@ -74,5 +76,5 @@ class PaymentViewSet(viewsets.ReadOnlyModelViewSet):
         if user.is_landlord:
             return Payment.objects.filter(bill__room__landlord=user)
         if user.is_tenant:
-            return Payment.objects.filter(bill__tenant__room__tenant=user)
+            return Payment.objects.filter(bill__tenant__user=user)
         return Payment.objects.none()
