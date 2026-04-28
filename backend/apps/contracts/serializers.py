@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.core.validators import MinValueValidator
 from .models import Contract
 
 
@@ -20,6 +21,11 @@ class ContractSerializer(serializers.ModelSerializer):
 
 
 class ContractCreateSerializer(serializers.ModelSerializer):
+    deposit_amount = serializers.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0)], required=False)
+    monthly_rent = serializers.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0)])
+    terms = serializers.CharField(required=False, allow_blank=True, max_length=5000)
+    notes = serializers.CharField(required=False, allow_blank=True, max_length=2000)
+
     class Meta:
         model = Contract
         fields = [
@@ -34,9 +40,21 @@ class ContractCreateSerializer(serializers.ModelSerializer):
 
 
 class ContractUpdateSerializer(serializers.ModelSerializer):
+    deposit_amount = serializers.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0)], required=False)
+    monthly_rent = serializers.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0)], required=False)
+    terms = serializers.CharField(required=False, allow_blank=True, max_length=5000)
+    notes = serializers.CharField(required=False, allow_blank=True, max_length=2000)
+
     class Meta:
         model = Contract
         fields = [
             "tenant", "room", "start_date", "end_date",
             "deposit_amount", "monthly_rent", "status", "terms", "notes"
         ]
+
+    def validate(self, attrs):
+        start_date = attrs.get("start_date", self.instance.start_date if self.instance else None)
+        end_date = attrs.get("end_date", self.instance.end_date if self.instance else None)
+        if start_date and end_date and end_date <= start_date:
+            raise serializers.ValidationError({"end_date": "End date must be after start date."})
+        return attrs

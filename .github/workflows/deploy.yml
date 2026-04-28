@@ -6,8 +6,11 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  # ========== BACKEND TEST ==========
   backend-test:
     runs-on: ubuntu-latest
     env:
@@ -15,6 +18,8 @@ jobs:
       SECRET_KEY: test-secret-key-for-ci
       DEBUG: "True"
       ALLOWED_HOSTS: localhost,127.0.0.1
+      CORS_ALLOWED_ORIGINS: http://localhost:5173
+
     steps:
       - uses: actions/checkout@v4
 
@@ -37,12 +42,14 @@ jobs:
         run: cd backend && python manage.py check
 
       - name: Run migrations
-        run: cd backend && python manage.py migrate
+        run: cd backend && python manage.py migrate --noinput
+
+      - name: Run linting
+        run: cd backend && python -m flake8 --max-line-length=200 --extend-ignore=E501,W292,F401,E402 --exclude=migrations,venv,./venv,__pycache__ || true
 
       - name: Run tests
-        run: cd backend && pytest --tb=short -q
+        run: cd backend && pytest tests/ --tb=short -q
 
-  # ========== FRONTEND TEST ==========
   frontend-test:
     runs-on: ubuntu-latest
     steps:
@@ -58,31 +65,67 @@ jobs:
       - name: Install dependencies
         run: cd frontend && npm ci
 
+      - name: Run linting
+        run: cd frontend && npm run lint
+
       - name: TypeScript check + build
         run: cd frontend && npm run build
 
-  # ========== DEPLOY BACKEND (Render) ==========
+      - name: Run unit tests
+        run: cd frontend && npm test -- --run
+
   deploy-backend:
-    needs: [backend-test]
+    needs: [backend-test, frontend-test]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Render Deploy Hook
         run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
 
-  # ========== DEPLOY FRONTEND (Vercel) ==========
+      - name: Wait for deployment
+        run: sleep 60
+
+      - name: Health check
+        run: |
+          for i in {1..5}; do
+            status=$(curl -s -o /dev/null -w "%{http_code}" "https://room-rental-management-system.onrender.com/api/docs/" || echo "000")
+            if [ "$status" = "200" ]; then
+              echo "Backend is healthy!"
+              exit 0
+            fi
+            echo "Attempt $i: Backend returned status $status, retrying in 30s..."
+            sleep 30
+          done
+          echo "Backend health check failed after 5 attempts"
+          exit 1
+
   deploy-frontend:
-    needs: [frontend-test]
+    needs: [backend-test, frontend-test]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
       - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: "--prod"
-          working-directory: frontend
+        run: |
+          cd frontend
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Health check
+        run: |
+          for i in {1..5}; do
+            status=$(curl -s -o /dev/null -w "%{http_code}" "https://room-rental-management-system-front.vercel.app/" || echo "000")
+            if [ "$status" = "200" ]; then
+              echo "Frontend is healthy!"
+              exit 0
+            fi
+            echo "Attempt $i: Frontend returned status $status, retrying in 30s..."
+            sleep 30
+          done
+          echo "Frontend health check failed after 5 attempts"
+          exit 1

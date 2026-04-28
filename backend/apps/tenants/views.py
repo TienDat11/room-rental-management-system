@@ -35,12 +35,14 @@ class TenantViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        # Tối ưu: select_related để tránh N+1 queries khi truy cập room
+        queryset = Tenant.objects.select_related("room", "user", "landlord")
         if user.is_admin:
-            return Tenant.objects.all()
+            return queryset
         if user.is_landlord:
-            return Tenant.objects.filter(landlord=user)
+            return queryset.filter(landlord=user)
         if user.is_tenant:
-            return Tenant.objects.filter(user=user)
+            return queryset.filter(user=user)
         return Tenant.objects.none()
 
     def perform_create(self, serializer):

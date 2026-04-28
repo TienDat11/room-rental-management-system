@@ -69,13 +69,23 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 import dj_database_url
 
+# Neon PostgreSQL requires SSL
+DATABASE_URL = os.environ.get("DATABASE_URL", f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
+if DATABASE_URL.startswith("postgres"):
+    DATABASE_URL += "&sslmode=require" if "?" in DATABASE_URL else "?sslmode=require"
+
 DATABASES = {
     "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        default=DATABASE_URL,
         conn_max_age=600,
         conn_health_checks=True,
     )
 }
+
+# Tối ưu PostgreSQL: tăng prepared statement cache, set timezone cho connection
+if DATABASES["default"].get("ENGINE", "").startswith("django.db.backends.postgresql"):
+    DATABASES["default"].setdefault("OPTIONS", {})
+    DATABASES["default"]["OPTIONS"]["prepare_threshold"] = 0  # Tắt prepared statement cache cho Neon serverless
 
 AUTH_USER_MODEL = "users.User"
 
@@ -106,7 +116,25 @@ SIMPLE_JWT = {
         days=int(os.environ.get("JWT_REFRESH_TOKEN_LIFETIME_DAYS", 7))
     ),
     "ROTATE_REFRESH_TOKENS": True,
+    "TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainPairSerializer",
 }
+
+# Tối ưu: Cache configuration - giảm tải database
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "room-rental-cache",
+        "TIMEOUT": 60,  # Cache 60 giây - ngắn đủ để data cập nhật nhanh
+        "OPTIONS": {
+            "MAX_ENTRIES": 500,  # Tối đa 500 entries
+            "CULL_FREQUENCY": 3,  # Xóa 1/3 entries khi đầy
+        },
+    }
+}
+
+CACHE_MIDDLEWARE_ALIAS = "default"
+CACHE_MIDDLEWARE_SECONDS = 60  # Cache trang 60 giây
+CACHE_MIDDLEWARE_KEY_PREFIX = "roomrental"
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Room Rental Management API",
@@ -134,4 +162,22 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Security headers (production only)
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = "DENY"
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True

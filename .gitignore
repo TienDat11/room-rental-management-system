@@ -98,6 +98,7 @@ task_board_*.md
 # OMC & Claude
 .omc/
 .claude/
+.playwright-mcp/
 
 # Test
 .pytest_cache/

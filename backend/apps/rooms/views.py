@@ -25,9 +25,12 @@ class RoomViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        # Tối ưu: select_related để tránh N+1 queries khi truy cập landlord
+        # prefetch_related cho images (nested serializer)
+        queryset = Room.objects.select_related("landlord").prefetch_related("images")
         if user.is_admin:
-            return Room.objects.all()
-        return Room.objects.filter(landlord=user)
+            return queryset
+        return queryset.filter(landlord=user)
 
     def perform_create(self, serializer):
         serializer.save(landlord=self.request.user)

@@ -1,9 +1,11 @@
 from rest_framework import serializers
+from django.core.validators import MinValueValidator
 from .models import Bill, Payment
 
 
 class PaymentSerializer(serializers.ModelSerializer):
     method_display = serializers.CharField(source="get_payment_method_display", read_only=True)
+    notes = serializers.CharField(required=False, allow_blank=True, max_length=2000)
 
     class Meta:
         model = Payment
@@ -54,6 +56,19 @@ class BillSerializer(serializers.ModelSerializer):
 
 
 class BillCreateSerializer(serializers.ModelSerializer):
+    bill_month = serializers.IntegerField(validators=[MinValueValidator(1)])
+    bill_year = serializers.IntegerField(validators=[MinValueValidator(2000)])
+    room_price = serializers.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0)])
+    electricity_previous = serializers.DecimalField(max_digits=10, decimal_places=1, validators=[MinValueValidator(0)], required=False)
+    electricity_current = serializers.DecimalField(max_digits=10, decimal_places=1, validators=[MinValueValidator(0)], required=False)
+    electricity_price_per_unit = serializers.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)], required=False)
+    water_previous = serializers.DecimalField(max_digits=10, decimal_places=1, validators=[MinValueValidator(0)], required=False)
+    water_current = serializers.DecimalField(max_digits=10, decimal_places=1, validators=[MinValueValidator(0)], required=False)
+    water_price_per_unit = serializers.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)], required=False)
+    other_fees = serializers.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0)], required=False)
+    other_fees_description = serializers.CharField(required=False, allow_blank=True, max_length=1000)
+    notes = serializers.CharField(required=False, allow_blank=True, max_length=2000)
+
     class Meta:
         model = Bill
         fields = [
@@ -64,8 +79,33 @@ class BillCreateSerializer(serializers.ModelSerializer):
             "due_date", "notes"
         ]
 
+    def validate(self, attrs):
+        electricity_previous = attrs.get("electricity_previous", 0)
+        electricity_current = attrs.get("electricity_current", 0)
+        water_previous = attrs.get("water_previous", 0)
+        water_current = attrs.get("water_current", 0)
+
+        if electricity_current < electricity_previous:
+            raise serializers.ValidationError({"electricity_current": "Chỉ số điện hiện tại phải lớn hơn hoặc bằng chỉ số trước."})
+        if water_current < water_previous:
+            raise serializers.ValidationError({"water_current": "Chỉ số nước hiện tại phải lớn hơn hoặc bằng chỉ số trước."})
+        return attrs
+
 
 class BillUpdateSerializer(serializers.ModelSerializer):
+    bill_month = serializers.IntegerField(validators=[MinValueValidator(1)], required=False)
+    bill_year = serializers.IntegerField(validators=[MinValueValidator(2000)], required=False)
+    room_price = serializers.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0)], required=False)
+    electricity_previous = serializers.DecimalField(max_digits=10, decimal_places=1, validators=[MinValueValidator(0)], required=False)
+    electricity_current = serializers.DecimalField(max_digits=10, decimal_places=1, validators=[MinValueValidator(0)], required=False)
+    electricity_price_per_unit = serializers.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)], required=False)
+    water_previous = serializers.DecimalField(max_digits=10, decimal_places=1, validators=[MinValueValidator(0)], required=False)
+    water_current = serializers.DecimalField(max_digits=10, decimal_places=1, validators=[MinValueValidator(0)], required=False)
+    water_price_per_unit = serializers.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)], required=False)
+    other_fees = serializers.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0)], required=False)
+    other_fees_description = serializers.CharField(required=False, allow_blank=True, max_length=1000)
+    notes = serializers.CharField(required=False, allow_blank=True, max_length=2000)
+
     class Meta:
         model = Bill
         fields = [
@@ -76,8 +116,24 @@ class BillUpdateSerializer(serializers.ModelSerializer):
             "status", "due_date", "notes"
         ]
 
+    def validate(self, attrs):
+        instance = self.instance
+        electricity_previous = attrs.get("electricity_previous", instance.electricity_previous if instance else 0)
+        electricity_current = attrs.get("electricity_current", instance.electricity_current if instance else 0)
+        water_previous = attrs.get("water_previous", instance.water_previous if instance else 0)
+        water_current = attrs.get("water_current", instance.water_current if instance else 0)
+
+        if electricity_current < electricity_previous:
+            raise serializers.ValidationError({"electricity_current": "Chỉ số điện hiện tại phải lớn hơn hoặc bằng chỉ số trước."})
+        if water_current < water_previous:
+            raise serializers.ValidationError({"water_current": "Chỉ số nước hiện tại phải lớn hơn hoặc bằng chỉ số trước."})
+        return attrs
+
 
 class PaymentCreateSerializer(serializers.ModelSerializer):
+    amount = serializers.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0)])
+    notes = serializers.CharField(required=False, allow_blank=True, max_length=2000)
+
     class Meta:
         model = Payment
         fields = ["amount", "payment_method", "payment_date", "notes"]

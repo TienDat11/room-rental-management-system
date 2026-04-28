@@ -30,12 +30,14 @@ class ContractViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        # Tối ưu: select_related để tránh N+1 queries khi truy cập tenant, room, landlord
+        queryset = Contract.objects.select_related("tenant", "room", "landlord", "tenant__user")
         if user.is_admin:
-            return Contract.objects.all()
+            return queryset
         if user.is_landlord:
-            return Contract.objects.filter(landlord=user)
+            return queryset.filter(landlord=user)
         if user.is_tenant:
-            return Contract.objects.filter(tenant__user=user)
+            return queryset.filter(tenant__user=user)
         return Contract.objects.none()
 
     def perform_create(self, serializer):

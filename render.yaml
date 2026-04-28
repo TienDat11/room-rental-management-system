@@ -1,11 +1,34 @@
-[build]
-  command = "cd backend && pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate"
-  startCommand = "cd backend && gunicorn config.wsgi:application"
-  env = "Python"
+services:
+  - type: web
+    name: room-rental-backend
+    env: python
+    region: singapore
+    plan: free
+    branch: main
+    buildCommand: cd backend && pip install -r requirements.txt && python manage.py collectstatic --noinput
+    startCommand: cd backend && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2
+    healthCheckPath: /api/docs/
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: room-rental-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: .onrender.com
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://room-rental-management-system.vercel.app
+      - key: WEB_CONCURRENCY
+        value: 2
 
-[env]
-  DATABASE_URL = { required = true }
-  SECRET_KEY = { required = true }
-  DEBUG = "False"
-  ALLOWED_HOSTS = "*.onrender.com"
-  CORS_ALLOWED_ORIGINS = "https://room-rental-management-system.vercel.app"
+databases:
+  - name: room-rental-db
+    region: singapore
+    plan: free
+    databaseName: room_rental
+    user: room_rental_user

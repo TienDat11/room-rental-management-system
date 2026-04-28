@@ -32,12 +32,17 @@ class BillViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        # Tối ưu: select_related để tránh N+1 queries khi truy cập tenant, room, contract
+        # prefetch_related cho payments (nested serializer)
+        queryset = Bill.objects.select_related(
+            "tenant", "room", "contract", "tenant__user"
+        ).prefetch_related("payments")
         if user.is_admin:
-            return Bill.objects.all()
+            return queryset
         if user.is_landlord:
-            return Bill.objects.filter(room__landlord=user)
+            return queryset.filter(room__landlord=user)
         if user.is_tenant:
-            return Bill.objects.filter(tenant__user=user)
+            return queryset.filter(tenant__user=user)
         return Bill.objects.none()
 
     @extend_schema(
@@ -71,10 +76,12 @@ class PaymentViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        # Tối ưu: select_related để tránh N+1 queries khi truy cập bill
+        queryset = Payment.objects.select_related("bill", "bill__room", "bill__tenant")
         if user.is_admin:
-            return Payment.objects.all()
+            return queryset
         if user.is_landlord:
-            return Payment.objects.filter(bill__room__landlord=user)
+            return queryset.filter(bill__room__landlord=user)
         if user.is_tenant:
-            return Payment.objects.filter(bill__tenant__user=user)
+            return queryset.filter(bill__tenant__user=user)
         return Payment.objects.none()
