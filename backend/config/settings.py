@@ -147,7 +147,7 @@ _raw_cors = os.environ.get(
     "CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:3000"
 )
 CORS_ALLOWED_ORIGINS = [
-    origin.strip()
+    origin.strip().rstrip("/")
     for origin in _raw_cors.split(",")
     if origin.strip().startswith(("http://", "https://"))
 ]
