@@ -4,12 +4,21 @@
   "framework": "vite",
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "https://room-rental-management-system.onrender.com/api/:path*"
+      "source": "/api/:path*/",
+      "destination": "https://room-rental-management-system.onrender.com/api/:path*/"
     },
     {
-      "source": "/:path*",
-      "destination": "/index.html"
+      "source": "/api/:path*",
+      "destination": "https://room-rental-management-system.onrender.com/api/:path*/"
+    }
+  ],
+  "routes": [
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
