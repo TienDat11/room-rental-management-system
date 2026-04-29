@@ -1,0 +1,111 @@
+Báo Cáo Thực Tập Tốt Nghiệp
+Thành viên trong nhóm:
+Nguyễn Thị Kim Chi – MSV: 22T1020553
+Lê Hải Kiều Linh – MSV: 22T1020651
+Đề xuất đề tài:
+Tên đề tài: Xây dựng website quản lý cho thuê phòng trọ
+Nội dung cơ bản:
+3.1 Mục tiêu của đề tài:
+Về mặt thực tiễn: Xây dựng website quản lý cho thuê trọ cung cấp một nền tảng tiện lợi cho chủ trọ và người thuê trọ, hệ thống giúp chủ trọ quản lý hiệu quả các phòng trọ cho thuê, dịch vụ, hóa đơn và người thuê trọ có thể sử dụng để tra cứu thông tin về phòng đang thuê, hóa đơn và lịch sử thanh toán.
+Về mặt kỹ thuật:
+Nghiên cứu và áp dụng kiến trúc RESTful API với framework Spring Boot để xây dựng hệ thống Backend ổn định và bảo mật.
+Sử dụng thư viện ReactJS để xây dựng giao diện người dùng (Frontend) hiện đại, thân thiện và dễ sử dụng.
+Thiết kế và quản trị cơ sở dữ liệu quan hệ với PostgreSQL, đảm bảo tính toàn vẹn và tối ưu hiệu suất truy vấn.
+Nội dung thực hiện:
+Phân tích yêu cầu: Khảo sát và phân tích quy trình quản lý phòng trọ thực tế, xác định các đối tượng sử dụng hệ thống như quản trị viên (admin), người quản lý nhà trọ, người thuê phòng. Từ đó xây dựng các chức năng phù hợp với nhu cầu quản lý phòng trọ như quản lý phòng, quản lý người thuê, quản lý hợp đồng và quản lý hóa đơn.
+Thiết kế hệ thống:
+Thiết kế cơ sở dữ liệu
+Xây dựng sơ đồ cơ sở dữ liệu (ERD) với các thực thể chính như:
+Người dùng (Users)
+Người thuê (Tenants)
+Phòng trọ (Rooms)
+Hợp đồng thuê (Contracts)
+Hóa đơn (Bills)
+Thanh toán (Payments)
+Dịch vụ (RoomServices)
+Thiết kế kiến trúc hệ thống
+Thiết kế hệ thống theo mô hình Client – Server, trong đó:
+Frontend (ReactJS): đảm nhiệm giao diện và tương tác với người dùng.
+Backend (Spring Boot): xử lý logic nghiệp vụ và cung cấp các API cho hệ thống.
+Database (PostgreSQL): lưu trữ dữ liệu liên quan đến phòng trọ, người thuê và các giao dịch.
+Thiết kế giao diện
+Thiết kế giao diện hệ thống đảm bảo:
+Thân thiện với người dùng
+Dễ sử dụng
+Bố cục rõ ràng, trực quan
+Phát triển phần mềm
+Backend
+Xây dựng các API phục vụ các chức năng chính của hệ thống như:
+Quản lý người dùng
+Quản lý phòng trọ
+Quản lý người thuê
+Quản lý hợp đồng thuê
+Quản lý hóa đơn tiền phòng, điện và nước
+Thống kê và báo cáo doanh thu
+Frontend
+Xây dựng các giao diện chính của hệ thống:
+Trang đăng nhập hệ thống
+Trang quản lý phòng trọ
+Trang quản lý người thuê
+Trang quản lý hợp đồng thuê
+Trang quản lý hóa đơn
+Trang thống kê và báo cáo cho quản trị viên
+Kiểm thử và hoàn thiện
+Thực hiện kiểm thử hệ thống nhằm phát hiện lỗi và đảm bảo các chức năng hoạt động đúng yêu cầu. Sau đó tiến hành sửa lỗi, tối ưu hiệu năng và hoàn thiện hệ thống trước khi triển khai.
+Dự kiến tiến độ thực hiện
+Tuần
+Nội dung công việc
+Kết quả dự kiến
+Tuần 1
+Phân tích yêu cầu và thiết kế hệ thống
+Hoàn thành tài liệu đặc tả yêu cầu, sơ đồ ERD và sơ đồ Use Case.
+Tuần 2
+Thiết kế UI/UX
+Hoàn thành Prototype trên Figma; Khởi tạo Project Spring Boot & ReactJS; Thiết lập cấu hình ban đầu.
+Tuần 3
+Phát triển Backend
+Thiết kế cơ sở dữ liệu; Xây dựng API đăng ký, đăng nhập và phân quyền
+Tuần 4
+Phát triển Backend
+Hoàn thiện API quản lý phòng trọ, quản lý người thuê
+Tuần 5
+Phát triển Frontend
+Xây dựng giao diện quản lý phòng trọ và người thuê, kết nối API
+Tuần 6
+Phát triển Frontend
+Hoàn thiện dashboard quản lý, thống kê và báo cáo
+Tuần 7
+Kiểm thử và Tối ưu
+Hoàn thành việc kiểm thử toàn diện hệ thống, sửa lỗi và tối ưu hiệu năng.
+Tuần 8
+Hoàn thiện báo cáo và Slide
+Hoàn thành cuốn báo cáo Word và slide thuyết trình.
+Các công việc đã triển khai:
+Tính tới thời điểm hiện tại, nhóm đã triển khai và hoàn thành các công việc thuộc giai đoạn đầu của đề tài như sau:
+Thành lập nhóm, thống nhất kế hoạch làm việc và phân công nhiệm vụ cụ thể cho từng thành viên trong quá trình thực hiện đề tài.
+Thống nhất, chuẩn hóa tên đề tài: Xây dựng website quản lý cho thuê phòng trọ.
+Tìm hiểu quy trình quản lý phòng trọ trên thực tế.
+Phân tích yêu cầu chức năng và phi chức năng của hệ thống.
+Xác định các đối tượng sử dụng hệ thống gồm Quản trị viên (Admin), Chủ trọ và Người thuê phòng.
+Lựa chọn công nghệ phát triển gồm Spring Boot, ReactJS, PostgreSQL
+Lập kế hoạch thực hiện đề tài theo từng giai đoạn và từng tuần.
+Thiết kế sơ bộ cơ sở dữ liệu, xác định các bảng dữ liệu chính như Users, Rooms, Tenants, Contracts, Bills và Payments.
+Hoàn thiện cơ bản tài liệu đặc tả yêu cầu, sơ đồ ERD và sơ đồ Use Case.
+Các nội dung sẽ tiếp tục thực hiện:
+Trong thời gian tới, nhóm dự kiến tiếp tục triển khai các nội dung như sau:
+Hoàn thành thiết kế giao diện người dùng và tối ưu Prototype trên Figma.
+Tiếp tục rà soát, bổ sung, hoàn thiện chi tiết cơ sở dữ liệu phục vụ quá trình phát triển hệ thống và triển khai trên PostgreSQL.
+Khởi tạo dự án Frontend bằng ReactJS và cấu hình môi trường phát triển.
+Khởi tạo dự án Backend bằng Spring Boot, xây dựng cấu trúc thư mục và các module chức năng.
+Xây dựng chức năng đăng kí, đăng nhập và phân quyền người dùng.
+Phát triển các chức năng quản lý phòng trọ, người thuê, hợp đồng và hóa đơn.
+Kết nối Frontend với Backend thông qua RESTful API
+Kiểm thử các chức năng chính của hệ thống và khắc phục lỗi phát sinh,
+Tối ưu hiệu năng, bảo mật hệ thống và hoàn thiện giao diện người dùng.
+Hoàn thành báo cáo tốt nghiệp và slide phục vụ bảo vệ đề tài.
+Các khó khăn, vướng mắc trong thực hiện đề tài:
+Trong các bước đầu phát triển đề tài, nhóm gặp một số khó khăn và vướng mắc như sau:
+Khối lượng công việc của đề tài tương đối lớn, bao gồm cả phân tích, thiết kế, lập trình và hoàn thiện báo cáo trong thời gian giới hạn.
+Khó khăn trong việc chuyển đổi các quy trình quản lý phòng trọ phức tạp (như xử lý tiền cọc, tính hóa đơn theo ngày lẻ, quản lý trạng thái hợp đồng) thành tài liệu đặc tả (SRS) và sơ đồ Use Case, đảm bảo bao quát hết các kịch bản phát sinh cho cả 3 đối tượng người dùng.
+Việc phát triển đồng thời Frontend bằng React và Backend đòi hỏi khả năng quản lý tiến độ hợp lý.
+Quá trình thiết kế cơ sở dữ liệu trên PostgreSQL cần được tính toán kỹ nhằm đảm bảo tính toàn vẹn dữ liệu và khả năng mở rộng.
