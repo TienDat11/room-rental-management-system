@@ -82,10 +82,9 @@ DATABASES = {
     )
 }
 
-# Tối ưu PostgreSQL: tăng prepared statement cache, set timezone cho connection
-if DATABASES["default"].get("ENGINE", "").startswith("django.db.backends.postgresql"):
-    DATABASES["default"].setdefault("OPTIONS", {})
-    DATABASES["default"]["OPTIONS"]["prepare_threshold"] = 0  # Tắt prepared statement cache cho Neon serverless
+# PostgreSQL connection pooling cho serverless
+DATABASES["default"]["CONN_MAX_AGE"] = 600  # Reuse connections
+# Lưu ý: prepare_threshold chỉ hỗ trợ bởi psycopg3, không phải psycopg2
 
 AUTH_USER_MODEL = "users.User"
 
