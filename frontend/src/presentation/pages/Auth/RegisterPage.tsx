@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, Input, Button, Card, Select, Typography, message, Steps } from "antd";
 import { UserOutlined, LockOutlined, MailOutlined, PhoneOutlined, HomeOutlined, ArrowLeftOutlined } from "@ant-design/icons";
@@ -21,6 +21,7 @@ export function RegisterPage() {
   const registerMutation = useRegister();
   const {
     handleSubmit,
+    control,
     formState: { errors },
     setError,
   } = useForm<RegisterForm>({
@@ -50,7 +51,6 @@ export function RegisterPage() {
           fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
         }}
       >
-        {/* Left Side - Branding */}
         <div
           style={{
             flex: "1 1 50%",
@@ -66,42 +66,17 @@ export function RegisterPage() {
             overflow: "hidden",
           }}
         >
-          {/* Decorative Elements */}
           <div
-            style={{
-              position: "absolute",
-              top: "10%",
-              left: "-8%",
-              width: "350px",
-              height: "350px",
-              borderRadius: "50%",
-              background: "rgba(255,255,255,0.03)",
-            }}
+            style={{ position: "absolute", top: "10%", left: "-8%", width: 350, height: 350, borderRadius: "50%", background: "rgba(255,255,255,0.03)" }}
           />
           <div
-            style={{
-              position: "absolute",
-              bottom: "5%",
-              right: "-5%",
-              width: "250px",
-              height: "250px",
-              borderRadius: "50%",
-              background: "rgba(255,255,255,0.02)",
-            }}
+            style={{ position: "absolute", bottom: "5%", right: "-5%", width: 250, height: 250, borderRadius: "50%", background: "rgba(255,255,255,0.02)" }}
           />
 
-          {/* Logo */}
           <div
             style={{
-              width: 72,
-              height: 72,
-              borderRadius: 18,
-              background: "rgba(255,255,255,0.15)",
-              backdropFilter: "blur(10px)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: 28,
+              width: 72, height: 72, borderRadius: 18, background: "rgba(255,255,255,0.15)",
+              backdropFilter: "blur(10px)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 28,
             }}
           >
             <HomeOutlined style={{ fontSize: 36, color: "#fff" }} />
@@ -110,20 +85,10 @@ export function RegisterPage() {
           <Title level={1} style={{ color: "#fff", marginBottom: 16, fontWeight: 700, textAlign: "center" }}>
             Tham Gia Ngay!
           </Title>
-          <Paragraph
-            style={{
-              color: "rgba(255,255,255,0.85)",
-              fontSize: 17,
-              maxWidth: 380,
-              textAlign: "center",
-              lineHeight: 1.7,
-              marginBottom: 40,
-            }}
-          >
+          <Paragraph style={{ color: "rgba(255,255,255,0.85)", fontSize: 17, maxWidth: 380, textAlign: "center", lineHeight: 1.7, marginBottom: 40 }}>
             Tạo tài khoản để bắt đầu quản lý phòng trọ hiệu quả và chuyên nghiệp.
           </Paragraph>
 
-          {/* Steps Indicator */}
           <div style={{ maxWidth: 360, width: "100%" }}>
             <Steps
               direction="vertical"
@@ -150,21 +115,10 @@ export function RegisterPage() {
           </div>
         </div>
 
-        {/* Right Side - Register Form */}
         <div
-          style={{
-            flex: "1 1 50%",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: "40px 60px",
-            background: "#fff",
-            overflowY: "auto",
-          }}
+          style={{ flex: "1 1 50%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", padding: "40px 60px", background: "#fff", overflowY: "auto" }}
         >
           <div style={{ width: "100%", maxWidth: 440 }}>
-            {/* Back to Login */}
             <Button
               type="text"
               icon={<ArrowLeftOutlined />}
@@ -174,43 +128,35 @@ export function RegisterPage() {
               Quay lại đăng nhập
             </Button>
 
-            {/* Header */}
             <div style={{ marginBottom: 28 }}>
-              <Title level={2} style={{ marginBottom: 8, fontWeight: 700 }}>
-                Đăng Ký Tài Khoản
-              </Title>
-              <Text type="secondary" style={{ fontSize: 14 }}>
-                Tạo tài khoản mới để bắt đầu sử dụng hệ thống
-              </Text>
+              <Title level={2} style={{ marginBottom: 8, fontWeight: 700 }}>Đăng Ký Tài Khoản</Title>
+              <Text type="secondary" style={{ fontSize: 14 }}>Tạo tài khoản mới để bắt đầu sử dụng hệ thống</Text>
             </div>
 
-            {/* Register Form Card */}
-            <Card
-              style={{
-                borderRadius: 16,
-                boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
-                border: "none",
-              }}
-              styles={{ body: { padding: "28px 24px" } }}
-            >
+            <Card style={{ borderRadius: 16, boxShadow: "0 4px 24px rgba(0,0,0,0.06)", border: "none" }} styles={{ body: { padding: "28px 24px" } }}>
               <Form layout="vertical" onFinish={handleSubmit(onFinish)}>
-                {/* Username */}
                 <Form.Item
                   label={<Text style={{ fontWeight: 500 }}>Tên đăng nhập</Text>}
                   validateStatus={errors.username ? "error" : ""}
                   help={errors.username?.message}
                   style={{ marginBottom: 16 }}
                 >
-                  <Input
-                    prefix={<UserOutlined style={{ color: "#9ca3af" }} />}
-                    placeholder="Nhập tên đăng nhập"
-                    size="large"
-                    maxLength={50}
-                    style={{ borderRadius: 10 }}
+                  <Controller
+                    name="username"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        prefix={<UserOutlined style={{ color: "#9ca3af" }} />}
+                        placeholder="Nhập tên đăng nhập"
+                        size="large"
+                        maxLength={50}
+                        style={{ borderRadius: 10 }}
+                      />
+                    )}
                   />
                 </Form.Item>
 
-                {/* Email & Phone Row */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                   <Form.Item
                     label={<Text style={{ fontWeight: 500 }}>Email</Text>}
@@ -218,45 +164,55 @@ export function RegisterPage() {
                     help={errors.email?.message}
                     style={{ marginBottom: 16 }}
                   >
-                    <Input
-                      prefix={<MailOutlined style={{ color: "#9ca3af" }} />}
-                      placeholder="Nhập email"
-                      type="email"
-                      size="large"
-                      maxLength={254}
-                      style={{ borderRadius: 10 }}
+                    <Controller
+                      name="email"
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          {...field}
+                          prefix={<MailOutlined style={{ color: "#9ca3af" }} />}
+                          placeholder="Nhập email"
+                          type="email"
+                          size="large"
+                          maxLength={254}
+                          style={{ borderRadius: 10 }}
+                        />
+                      )}
                     />
                   </Form.Item>
-                  <Form.Item
-                    label={<Text style={{ fontWeight: 500 }}>Số điện thoại</Text>}
-                    style={{ marginBottom: 16 }}
-                  >
-                    <Input
-                      prefix={<PhoneOutlined style={{ color: "#9ca3af" }} />}
-                      placeholder="Nhập số điện thoại"
-                      size="large"
-                      maxLength={15}
-                      style={{ borderRadius: 10 }}
+                  <Form.Item label={<Text style={{ fontWeight: 500 }}>Số điện thoại</Text>} style={{ marginBottom: 16 }}>
+                    <Controller
+                      name="phone"
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          {...field}
+                          prefix={<PhoneOutlined style={{ color: "#9ca3af" }} />}
+                          placeholder="Nhập số điện thoại"
+                          size="large"
+                          maxLength={15}
+                          style={{ borderRadius: 10 }}
+                        />
+                      )}
                     />
                   </Form.Item>
                 </div>
 
-                {/* Full Name */}
                 <Form.Item
                   label={<Text style={{ fontWeight: 500 }}>Họ và tên</Text>}
                   validateStatus={errors.full_name ? "error" : ""}
                   help={errors.full_name?.message}
                   style={{ marginBottom: 16 }}
                 >
-                  <Input
-                    placeholder="Nhập họ và tên đầy đủ"
-                    size="large"
-                    maxLength={100}
-                    style={{ borderRadius: 10 }}
+                  <Controller
+                    name="full_name"
+                    control={control}
+                    render={({ field }) => (
+                      <Input {...field} placeholder="Nhập họ và tên đầy đủ" size="large" maxLength={100} style={{ borderRadius: 10 }} />
+                    )}
                   />
                 </Form.Item>
 
-                {/* Password & Confirm Row */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                   <Form.Item
                     label={<Text style={{ fontWeight: 500 }}>Mật khẩu</Text>}
@@ -264,12 +220,19 @@ export function RegisterPage() {
                     help={errors.password?.message}
                     style={{ marginBottom: 16 }}
                   >
-                    <Input.Password
-                      prefix={<LockOutlined style={{ color: "#9ca3af" }} />}
-                      placeholder="Nhập mật khẩu"
-                      size="large"
-                      maxLength={128}
-                      style={{ borderRadius: 10 }}
+                    <Controller
+                      name="password"
+                      control={control}
+                      render={({ field }) => (
+                        <Input.Password
+                          {...field}
+                          prefix={<LockOutlined style={{ color: "#9ca3af" }} />}
+                          placeholder="Nhập mật khẩu"
+                          size="large"
+                          maxLength={128}
+                          style={{ borderRadius: 10 }}
+                        />
+                      )}
                     />
                   </Form.Item>
                   <Form.Item
@@ -278,51 +241,42 @@ export function RegisterPage() {
                     help={errors.password_confirm?.message}
                     style={{ marginBottom: 16 }}
                   >
-                    <Input.Password
-                      prefix={<LockOutlined style={{ color: "#9ca3af" }} />}
-                      placeholder="Xác nhận mật khẩu"
-                      size="large"
-                      maxLength={128}
-                      style={{ borderRadius: 10 }}
+                    <Controller
+                      name="password_confirm"
+                      control={control}
+                      render={({ field }) => (
+                        <Input.Password
+                          {...field}
+                          prefix={<LockOutlined style={{ color: "#9ca3af" }} />}
+                          placeholder="Xác nhận mật khẩu"
+                          size="large"
+                          maxLength={128}
+                          style={{ borderRadius: 10 }}
+                        />
+                      )}
                     />
                   </Form.Item>
                 </div>
 
-                {/* Role Select */}
-                <Form.Item
-                  label={<Text style={{ fontWeight: 500 }}>Vai trò</Text>}
-                  style={{ marginBottom: 20 }}
-                >
-                  <Select
-                    defaultValue="LANDLORD"
-                    size="large"
-                    style={{ borderRadius: 10 }}
-                  >
-                    <Select.Option value="LANDLORD">
-                      <span>🏠 Chủ trọ</span>
-                    </Select.Option>
-                    <Select.Option value="TENANT">
-                      <span>👤 Người thuê</span>
-                    </Select.Option>
-                  </Select>
+                <Form.Item label={<Text style={{ fontWeight: 500 }}>Vai trò</Text>} style={{ marginBottom: 20 }}>
+                  <Controller
+                    name="role"
+                    control={control}
+                    render={({ field }) => (
+                      <Select {...field} size="large" style={{ borderRadius: 10 }}>
+                        <Select.Option value="LANDLORD"><span>🏠 Chủ trọ</span></Select.Option>
+                        <Select.Option value="TENANT"><span>👤 Người thuê</span></Select.Option>
+                      </Select>
+                    )}
+                  />
                 </Form.Item>
 
-                {/* Error Message */}
                 {errors.root && (
-                  <div
-                    style={{
-                      padding: "10px 14px",
-                      background: "#fff2f0",
-                      border: "1px solid #ffccc7",
-                      borderRadius: 8,
-                      marginBottom: 16,
-                    }}
-                  >
+                  <div style={{ padding: "10px 14px", background: "#fff2f0", border: "1px solid #ffccc7", borderRadius: 8, marginBottom: 16 }}>
                     <Text style={{ color: "#cf1322", fontSize: 13 }}>{errors.root.message}</Text>
                   </div>
                 )}
 
-                {/* Submit Button */}
                 <Form.Item style={{ marginBottom: 20 }}>
                   <Button
                     type="primary"
@@ -330,24 +284,16 @@ export function RegisterPage() {
                     size="large"
                     block
                     loading={registerMutation.isPending}
-                    style={{
-                      borderRadius: 10,
-                      height: 48,
-                      fontWeight: 600,
-                      fontSize: 15,
-                    }}
+                    style={{ borderRadius: 10, height: 48, fontWeight: 600, fontSize: 15 }}
                   >
                     {registerMutation.isPending ? "Đang tạo tài khoản..." : "Đăng Ký"}
                   </Button>
                 </Form.Item>
 
-                {/* Login Link */}
                 <div style={{ textAlign: "center" }}>
                   <Text type="secondary" style={{ fontSize: 14 }}>
                     Đã có tài khoản?{" "}
-                    <Link to="/login" style={{ fontWeight: 600, color: "#1677ff" }}>
-                      Đăng nhập ngay
-                    </Link>
+                    <Link to="/login" style={{ fontWeight: 600, color: "#1677ff" }}>Đăng nhập ngay</Link>
                   </Text>
                 </div>
               </Form>

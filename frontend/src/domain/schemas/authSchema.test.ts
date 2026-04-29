@@ -33,8 +33,8 @@ describe("authSchema", () => {
       const result = registerSchema.safeParse({
         username: "testuser",
         email: "test@example.com",
-        password: "password123",
-        password_confirm: "password123",
+        password: "Password123",
+        password_confirm: "Password123",
         full_name: "Test User",
         role: "TENANT",
       });
@@ -45,8 +45,8 @@ describe("authSchema", () => {
       const result = registerSchema.safeParse({
         username: "testuser",
         email: "test@example.com",
-        password: "password123",
-        password_confirm: "differentpassword",
+        password: "Password123",
+        password_confirm: "Different123",
         full_name: "Test User",
         role: "TENANT",
       });
@@ -57,8 +57,8 @@ describe("authSchema", () => {
       const result = registerSchema.safeParse({
         username: "ab",
         email: "test@example.com",
-        password: "password123",
-        password_confirm: "password123",
+        password: "Password123",
+        password_confirm: "Password123",
         full_name: "Test User",
         role: "TENANT",
       });
@@ -69,8 +69,8 @@ describe("authSchema", () => {
       const result = registerSchema.safeParse({
         username: "testuser",
         email: "invalid-email",
-        password: "password123",
-        password_confirm: "password123",
+        password: "Password123",
+        password_confirm: "Password123",
         full_name: "Test User",
         role: "TENANT",
       });
@@ -81,12 +81,62 @@ describe("authSchema", () => {
       const result = registerSchema.safeParse({
         username: "testuser",
         email: "test@example.com",
-        password: "pass",
-        password_confirm: "pass",
+        password: "Pass1",
+        password_confirm: "Pass1",
         full_name: "Test User",
         role: "TENANT",
       });
       expect(result.success).toBe(false);
+    });
+
+    it("should reject password without uppercase letter", () => {
+      const result = registerSchema.safeParse({
+        username: "testuser",
+        email: "test@example.com",
+        password: "password123",
+        password_confirm: "password123",
+        full_name: "Test User",
+        role: "TENANT",
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it("should reject password without digit", () => {
+      const result = registerSchema.safeParse({
+        username: "testuser",
+        email: "test@example.com",
+        password: "Passwordxxx",
+        password_confirm: "Passwordxxx",
+        full_name: "Test User",
+        role: "TENANT",
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it("should reject invalid phone format", () => {
+      const result = registerSchema.safeParse({
+        username: "testuser",
+        email: "test@example.com",
+        password: "Password123",
+        password_confirm: "Password123",
+        full_name: "Test User",
+        phone: "12345",
+        role: "TENANT",
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it("should accept valid phone format", () => {
+      const result = registerSchema.safeParse({
+        username: "testuser",
+        email: "test@example.com",
+        password: "Password123",
+        password_confirm: "Password123",
+        full_name: "Test User",
+        phone: "0912345678",
+        role: "TENANT",
+      });
+      expect(result.success).toBe(true);
     });
   });
 });

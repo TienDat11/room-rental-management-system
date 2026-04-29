@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, Form, Input, InputNumber, Select, Button, Typography, message, Row, Col, Divider, Spin, Tag } from "antd";
 import { SaveOutlined, ArrowLeftOutlined, HomeOutlined } from "@ant-design/icons";
@@ -20,7 +20,7 @@ export function RoomFormPage() {
   const createMutation = useCreateRoom();
   const updateMutation = useUpdateRoom();
 
-  const { handleSubmit, reset, formState: { errors } } = useForm<RoomCreateForm>({
+  const { handleSubmit, control, reset, formState: { errors } } = useForm<RoomCreateForm>({
     resolver: zodResolver(roomCreateSchema),
     defaultValues: { room_number: "", floor: 1, area: 0, base_price: "0", amenities: "", description: "" },
   });
@@ -63,7 +63,6 @@ export function RoomFormPage() {
 
   return (
     <div>
-      {/* Page Header */}
       <div style={{ marginBottom: 24 }}>
         <Button
           type="text"
@@ -76,38 +75,23 @@ export function RoomFormPage() {
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
           <div
             style={{
-              width: 40,
-              height: 40,
-              borderRadius: 10,
-              background: isEdit
-                ? "linear-gradient(135deg, #fa8c16 0%, #d48806 100%)"
-                : "linear-gradient(135deg, #1677ff 0%, #0958d9 100%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              width: 40, height: 40, borderRadius: 10,
+              background: isEdit ? "linear-gradient(135deg, #fa8c16 0%, #d48806 100%)" : "linear-gradient(135deg, #1677ff 0%, #0958d9 100%)",
+              display: "flex", alignItems: "center", justifyContent: "center",
             }}
           >
             <HomeOutlined style={{ color: "#fff", fontSize: 18 }} />
           </div>
-          <Title level={3} style={{ margin: 0 }}>
-            {isEdit ? "Chỉnh Sửa Phòng" : "Thêm Phòng Mới"}
-          </Title>
+          <Title level={3} style={{ margin: 0 }}>{isEdit ? "Chỉnh Sửa Phòng" : "Thêm Phòng Mới"}</Title>
         </div>
         <Text type="secondary" style={{ fontSize: 14, marginLeft: 52 }}>
           {isEdit ? "Cập nhật thông tin chi tiết của phòng" : "Điền thông tin để tạo phòng mới"}
         </Text>
       </div>
 
-      {/* Form Card */}
-      <Card
-        style={{ borderRadius: 16, border: "none", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}
-        styles={{ body: { padding: 32 } }}
-      >
+      <Card style={{ borderRadius: 16, border: "none", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }} styles={{ body: { padding: 32 } }}>
         <Form layout="vertical" onFinish={handleSubmit(onFinish)}>
-          {/* Room Basic Info */}
-          <Title level={5} style={{ marginBottom: 20, color: "#1677ff" }}>
-            📋 Thông tin cơ bản
-          </Title>
+          <Title level={5} style={{ marginBottom: 20, color: "#1677ff" }}>📋 Thông tin cơ bản</Title>
 
           <Row gutter={24}>
             <Col xs={24} md={8}>
@@ -118,12 +102,12 @@ export function RoomFormPage() {
                 help={errors.room_number?.message}
                 style={{ marginBottom: 20 }}
               >
-                <Input
-                  placeholder="Ví dụ: 101, A201..."
-                  disabled={isEdit}
-                  size="large"
-                  maxLength={20}
-                  style={{ borderRadius: 10 }}
+                <Controller
+                  name="room_number"
+                  control={control}
+                  render={({ field }) => (
+                    <Input {...field} placeholder="Ví dụ: 101, A201..." disabled={isEdit} size="large" maxLength={20} style={{ borderRadius: 10 }} />
+                  )}
                 />
               </Form.Item>
             </Col>
@@ -135,12 +119,12 @@ export function RoomFormPage() {
                 help={errors.floor?.message}
                 style={{ marginBottom: 20 }}
               >
-                <InputNumber
-                  min={1}
-                  max={100}
-                  style={{ width: "100%", borderRadius: 10 }}
-                  placeholder="Nhập số tầng"
-                  size="large"
+                <Controller
+                  name="floor"
+                  control={control}
+                  render={({ field }) => (
+                    <InputNumber {...field} min={1} max={100} style={{ width: "100%", borderRadius: 10 }} placeholder="Nhập số tầng" size="large" />
+                  )}
                 />
               </Form.Item>
             </Col>
@@ -152,12 +136,12 @@ export function RoomFormPage() {
                 help={errors.area?.message}
                 style={{ marginBottom: 20 }}
               >
-                <InputNumber
-                  min={1}
-                  max={999999}
-                  style={{ width: "100%", borderRadius: 10 }}
-                  placeholder="Nhập diện tích"
-                  size="large"
+                <Controller
+                  name="area"
+                  control={control}
+                  render={({ field }) => (
+                    <InputNumber {...field} min={1} max={999999} style={{ width: "100%", borderRadius: 10 }} placeholder="Nhập diện tích" size="large" />
+                  )}
                 />
               </Form.Item>
             </Col>
@@ -172,29 +156,22 @@ export function RoomFormPage() {
                 help={errors.base_price?.message}
                 style={{ marginBottom: 20 }}
               >
-                <Input
-                  placeholder="Nhập giá cơ bản"
-                  size="large"
-                  style={{ borderRadius: 10 }}
+                <Controller
+                  name="base_price"
+                  control={control}
+                  render={({ field }) => (
+                    <Input {...field} placeholder="Nhập giá cơ bản" size="large" style={{ borderRadius: 10 }} />
+                  )}
                 />
               </Form.Item>
             </Col>
             {isEdit && room && (
               <Col xs={24} md={12}>
-                <Form.Item
-                  label={<Text style={{ fontWeight: 500 }}>Trạng thái</Text>}
-                  style={{ marginBottom: 20 }}
-                >
+                <Form.Item label={<Text style={{ fontWeight: 500 }}>Trạng thái</Text>} style={{ marginBottom: 20 }}>
                   <Select defaultValue={room.status} size="large" style={{ borderRadius: 10 }}>
-                    <Select.Option value="AVAILABLE">
-                      <Tag color="success" style={{ borderRadius: 6, margin: 0 }}>🟢 Còn trống</Tag>
-                    </Select.Option>
-                    <Select.Option value="OCCUPIED">
-                      <Tag color="processing" style={{ borderRadius: 6, margin: 0 }}>🔵 Đã thuê</Tag>
-                    </Select.Option>
-                    <Select.Option value="MAINTENANCE">
-                      <Tag color="warning" style={{ borderRadius: 6, margin: 0 }}>🟠 Bảo trì</Tag>
-                    </Select.Option>
+                    <Select.Option value="AVAILABLE"><Tag color="success" style={{ borderRadius: 6, margin: 0 }}>🟢 Còn trống</Tag></Select.Option>
+                    <Select.Option value="OCCUPIED"><Tag color="processing" style={{ borderRadius: 6, margin: 0 }}>🔵 Đã thuê</Tag></Select.Option>
+                    <Select.Option value="MAINTENANCE"><Tag color="warning" style={{ borderRadius: 6, margin: 0 }}>🟠 Bảo trì</Tag></Select.Option>
                   </Select>
                 </Form.Item>
               </Col>
@@ -203,55 +180,30 @@ export function RoomFormPage() {
 
           <Divider style={{ margin: "8px 0 24px" }} />
 
-          {/* Additional Info */}
-          <Title level={5} style={{ marginBottom: 20, color: "#1677ff" }}>
-            📝 Thông tin bổ sung
-          </Title>
+          <Title level={5} style={{ marginBottom: 20, color: "#1677ff" }}>📝 Thông tin bổ sung</Title>
 
-          <Form.Item
-            label={<Text style={{ fontWeight: 500 }}>Tiện nghi</Text>}
-            style={{ marginBottom: 20 }}
-          >
-            <TextArea
-              rows={3}
-              placeholder="Mô tả tiện nghi phòng (ví dụ: WiFi, điều hòa, nóng lạnh...)"
-              maxLength={1000}
-              showCount
-              style={{ borderRadius: 10 }}
+          <Form.Item label={<Text style={{ fontWeight: 500 }}>Tiện nghi</Text>} style={{ marginBottom: 20 }}>
+            <Controller
+              name="amenities"
+              control={control}
+              render={({ field }) => (
+                <TextArea {...field} rows={3} placeholder="Mô tả tiện nghi phòng (ví dụ: WiFi, điều hòa, nóng lạnh...)" maxLength={1000} showCount style={{ borderRadius: 10 }} />
+              )}
             />
           </Form.Item>
 
-          <Form.Item
-            label={<Text style={{ fontWeight: 500 }}>Mô tả</Text>}
-            style={{ marginBottom: 28 }}
-          >
-            <TextArea
-              rows={3}
-              placeholder="Mô tả thêm về phòng"
-              maxLength={1000}
-              showCount
-              style={{ borderRadius: 10 }}
+          <Form.Item label={<Text style={{ fontWeight: 500 }}>Mô tả</Text>} style={{ marginBottom: 28 }}>
+            <Controller
+              name="description"
+              control={control}
+              render={({ field }) => (
+                <TextArea {...field} rows={3} placeholder="Mô tả thêm về phòng" maxLength={1000} showCount style={{ borderRadius: 10 }} />
+              )}
             />
           </Form.Item>
 
-          {/* Action Buttons - Sticky Footer */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: 12,
-              paddingTop: 16,
-              borderTop: "1px solid #f0f0f0",
-            }}
-          >
-            <Button
-              size="large"
-              icon={<ArrowLeftOutlined />}
-              onClick={() => navigate("/rooms")}
-              style={{ borderRadius: 10, minWidth: 120 }}
-            >
-              Hủy bỏ
-            </Button>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, paddingTop: 16, borderTop: "1px solid #f0f0f0" }}>
+            <Button size="large" icon={<ArrowLeftOutlined />} onClick={() => navigate("/rooms")} style={{ borderRadius: 10, minWidth: 120 }}>Hủy bỏ</Button>
             <Button
               type="primary"
               size="large"

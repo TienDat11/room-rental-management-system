@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, Form, Input, Button, Typography, message, Row, Col, Divider, Spin } from "antd";
 import { SaveOutlined, ArrowLeftOutlined, TeamOutlined, UserOutlined, PhoneOutlined, MailOutlined, HomeOutlined } from "@ant-design/icons";
@@ -20,7 +20,7 @@ export function TenantFormPage() {
   const createMutation = useCreateTenant();
   const updateMutation = useUpdateTenant();
 
-  const { handleSubmit, reset, formState: { errors } } = useForm<TenantCreateForm>({
+  const { handleSubmit, control, reset, formState: { errors } } = useForm<TenantCreateForm>({
     resolver: zodResolver(tenantCreateSchema),
     defaultValues: { full_name: "", id_card: "", phone: "", email: "", address: "", emergency_contact: "", notes: "" },
   });
@@ -65,7 +65,6 @@ export function TenantFormPage() {
 
   return (
     <div>
-      {/* Page Header */}
       <div style={{ marginBottom: 24 }}>
         <Button
           type="text"
@@ -78,38 +77,23 @@ export function TenantFormPage() {
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
           <div
             style={{
-              width: 40,
-              height: 40,
-              borderRadius: 10,
-              background: isEdit
-                ? "linear-gradient(135deg, #fa8c16 0%, #d48806 100%)"
-                : "linear-gradient(135deg, #722ed1 0%, #531dab 100%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              width: 40, height: 40, borderRadius: 10,
+              background: isEdit ? "linear-gradient(135deg, #fa8c16 0%, #d48806 100%)" : "linear-gradient(135deg, #722ed1 0%, #531dab 100%)",
+              display: "flex", alignItems: "center", justifyContent: "center",
             }}
           >
             <TeamOutlined style={{ color: "#fff", fontSize: 18 }} />
           </div>
-          <Title level={3} style={{ margin: 0 }}>
-            {isEdit ? "Chỉnh Sửa Người Thuê" : "Thêm Người Thuê Mới"}
-          </Title>
+          <Title level={3} style={{ margin: 0 }}>{isEdit ? "Chỉnh Sửa Người Thuê" : "Thêm Người Thuê Mới"}</Title>
         </div>
         <Text type="secondary" style={{ fontSize: 14, marginLeft: 52 }}>
           {isEdit ? "Cập nhật thông tin chi tiết của người thuê" : "Điền thông tin để tạo người thuê mới"}
         </Text>
       </div>
 
-      {/* Form Card */}
-      <Card
-        style={{ borderRadius: 16, border: "none", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}
-        styles={{ body: { padding: 32 } }}
-      >
+      <Card style={{ borderRadius: 16, border: "none", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }} styles={{ body: { padding: 32 } }}>
         <Form layout="vertical" onFinish={handleSubmit(onFinish)}>
-          {/* Personal Info */}
-          <Title level={5} style={{ marginBottom: 20, color: "#722ed1" }}>
-            👤 Thông tin cá nhân
-          </Title>
+          <Title level={5} style={{ marginBottom: 20, color: "#722ed1" }}>👤 Thông tin cá nhân</Title>
 
           <Row gutter={24}>
             <Col xs={24} md={12}>
@@ -120,12 +104,12 @@ export function TenantFormPage() {
                 help={errors.full_name?.message}
                 style={{ marginBottom: 20 }}
               >
-                <Input
-                  prefix={<UserOutlined style={{ color: "#9ca3af" }} />}
-                  placeholder="Nhập họ và tên đầy đủ"
-                  size="large"
-                  maxLength={100}
-                  style={{ borderRadius: 10 }}
+                <Controller
+                  name="full_name"
+                  control={control}
+                  render={({ field }) => (
+                    <Input {...field} prefix={<UserOutlined style={{ color: "#9ca3af" }} />} placeholder="Nhập họ và tên đầy đủ" size="large" maxLength={100} style={{ borderRadius: 10 }} />
+                  )}
                 />
               </Form.Item>
             </Col>
@@ -137,11 +121,12 @@ export function TenantFormPage() {
                 help={errors.id_card?.message}
                 style={{ marginBottom: 20 }}
               >
-                <Input
-                  placeholder="Nhập số CMND/CCCD"
-                  size="large"
-                  maxLength={20}
-                  style={{ borderRadius: 10, fontFamily: "monospace" }}
+                <Controller
+                  name="id_card"
+                  control={control}
+                  render={({ field }) => (
+                    <Input {...field} placeholder="Nhập số CMND/CCCD" size="large" maxLength={20} style={{ borderRadius: 10, fontFamily: "monospace" }} />
+                  )}
                 />
               </Form.Item>
             </Col>
@@ -156,12 +141,12 @@ export function TenantFormPage() {
                 help={errors.phone?.message}
                 style={{ marginBottom: 20 }}
               >
-                <Input
-                  prefix={<PhoneOutlined style={{ color: "#9ca3af" }} />}
-                  placeholder="Nhập số điện thoại"
-                  size="large"
-                  maxLength={15}
-                  style={{ borderRadius: 10 }}
+                <Controller
+                  name="phone"
+                  control={control}
+                  render={({ field }) => (
+                    <Input {...field} prefix={<PhoneOutlined style={{ color: "#9ca3af" }} />} placeholder="Nhập số điện thoại" size="large" maxLength={15} style={{ borderRadius: 10 }} />
+                  )}
                 />
               </Form.Item>
             </Col>
@@ -172,13 +157,12 @@ export function TenantFormPage() {
                 help={errors.email?.message}
                 style={{ marginBottom: 20 }}
               >
-                <Input
-                  prefix={<MailOutlined style={{ color: "#9ca3af" }} />}
-                  placeholder="Nhập email"
-                  type="email"
-                  size="large"
-                  maxLength={254}
-                  style={{ borderRadius: 10 }}
+                <Controller
+                  name="email"
+                  control={control}
+                  render={({ field }) => (
+                    <Input {...field} prefix={<MailOutlined style={{ color: "#9ca3af" }} />} placeholder="Nhập email" type="email" size="large" maxLength={254} style={{ borderRadius: 10 }} />
+                  )}
                 />
               </Form.Item>
             </Col>
@@ -186,30 +170,24 @@ export function TenantFormPage() {
 
           <Row gutter={24}>
             <Col xs={24} md={12}>
-              <Form.Item
-                label={<Text style={{ fontWeight: 500 }}>Địa chỉ</Text>}
-                style={{ marginBottom: 20 }}
-              >
-                <Input
-                  prefix={<HomeOutlined style={{ color: "#9ca3af" }} />}
-                  placeholder="Nhập địa chỉ thường trú"
-                  size="large"
-                  maxLength={255}
-                  style={{ borderRadius: 10 }}
+              <Form.Item label={<Text style={{ fontWeight: 500 }}>Địa chỉ</Text>} style={{ marginBottom: 20 }}>
+                <Controller
+                  name="address"
+                  control={control}
+                  render={({ field }) => (
+                    <Input {...field} prefix={<HomeOutlined style={{ color: "#9ca3af" }} />} placeholder="Nhập địa chỉ thường trú" size="large" maxLength={255} style={{ borderRadius: 10 }} />
+                  )}
                 />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item
-                label={<Text style={{ fontWeight: 500 }}>Liên hệ khẩn cấp</Text>}
-                style={{ marginBottom: 20 }}
-              >
-                <Input
-                  prefix={<PhoneOutlined style={{ color: "#9ca3af" }} />}
-                  placeholder="Số điện thoại người thân"
-                  size="large"
-                  maxLength={100}
-                  style={{ borderRadius: 10 }}
+              <Form.Item label={<Text style={{ fontWeight: 500 }}>Liên hệ khẩn cấp</Text>} style={{ marginBottom: 20 }}>
+                <Controller
+                  name="emergency_contact"
+                  control={control}
+                  render={({ field }) => (
+                    <Input {...field} prefix={<PhoneOutlined style={{ color: "#9ca3af" }} />} placeholder="Số điện thoại người thân" size="large" maxLength={100} style={{ borderRadius: 10 }} />
+                  )}
                 />
               </Form.Item>
             </Col>
@@ -217,42 +195,20 @@ export function TenantFormPage() {
 
           <Divider style={{ margin: "8px 0 24px" }} />
 
-          {/* Additional Info */}
-          <Title level={5} style={{ marginBottom: 20, color: "#722ed1" }}>
-            📝 Thông tin bổ sung
-          </Title>
+          <Title level={5} style={{ marginBottom: 20, color: "#722ed1" }}>📝 Thông tin bổ sung</Title>
 
-          <Form.Item
-            label={<Text style={{ fontWeight: 500 }}>Ghi chú</Text>}
-            style={{ marginBottom: 28 }}
-          >
-            <TextArea
-              rows={3}
-              placeholder="Ghi chú thêm về người thuê"
-              maxLength={1000}
-              showCount
-              style={{ borderRadius: 10 }}
+          <Form.Item label={<Text style={{ fontWeight: 500 }}>Ghi chú</Text>} style={{ marginBottom: 28 }}>
+            <Controller
+              name="notes"
+              control={control}
+              render={({ field }) => (
+                <TextArea {...field} rows={3} placeholder="Ghi chú thêm về người thuê" maxLength={1000} showCount style={{ borderRadius: 10 }} />
+              )}
             />
           </Form.Item>
 
-          {/* Action Buttons */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: 12,
-              paddingTop: 16,
-              borderTop: "1px solid #f0f0f0",
-            }}
-          >
-            <Button
-              size="large"
-              icon={<ArrowLeftOutlined />}
-              onClick={() => navigate("/tenants")}
-              style={{ borderRadius: 10, minWidth: 120 }}
-            >
-              Hủy bỏ
-            </Button>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, paddingTop: 16, borderTop: "1px solid #f0f0f0" }}>
+            <Button size="large" icon={<ArrowLeftOutlined />} onClick={() => navigate("/tenants")} style={{ borderRadius: 10, minWidth: 120 }}>Hủy bỏ</Button>
             <Button
               type="primary"
               size="large"

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, Form, Input, Select, Button, Space, Typography, message, Row, Col, Divider, Spin } from "antd";
 import { SaveOutlined, ArrowLeftOutlined, FileTextOutlined, HomeOutlined, TeamOutlined } from "@ant-design/icons";
@@ -26,7 +26,7 @@ export function ContractFormPage() {
   const { data: roomsData } = useRooms();
   const { data: tenantsData } = useTenants();
 
-  const { handleSubmit, reset, formState: { errors } } = useForm<ContractCreateForm>({
+  const { handleSubmit, control, reset, formState: { errors } } = useForm<ContractCreateForm>({
     resolver: zodResolver(contractCreateSchema),
   });
 
@@ -70,7 +70,6 @@ export function ContractFormPage() {
 
   return (
     <div>
-      {/* Page Header */}
       <div style={{ marginBottom: 24 }}>
         <Button
           type="text"
@@ -83,38 +82,23 @@ export function ContractFormPage() {
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
           <div
             style={{
-              width: 40,
-              height: 40,
-              borderRadius: 10,
-              background: isEdit
-                ? "linear-gradient(135deg, #fa8c16 0%, #d48806 100%)"
-                : "linear-gradient(135deg, #13c2c2 0%, #08979c 100%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              width: 40, height: 40, borderRadius: 10,
+              background: isEdit ? "linear-gradient(135deg, #fa8c16 0%, #d48806 100%)" : "linear-gradient(135deg, #13c2c2 0%, #08979c 100%)",
+              display: "flex", alignItems: "center", justifyContent: "center",
             }}
           >
             <FileTextOutlined style={{ color: "#fff", fontSize: 18 }} />
           </div>
-          <Title level={3} style={{ margin: 0 }}>
-            {isEdit ? "Chỉnh Sửa Hợp Đồng" : "Tạo Hợp Đồng Mới"}
-          </Title>
+          <Title level={3} style={{ margin: 0 }}>{isEdit ? "Chỉnh Sửa Hợp Đồng" : "Tạo Hợp Đồng Mới"}</Title>
         </div>
         <Text type="secondary" style={{ fontSize: 14, marginLeft: 52 }}>
           {isEdit ? "Cập nhật thông tin hợp đồng thuê phòng" : "Tạo hợp đồng thuê phòng mới"}
         </Text>
       </div>
 
-      {/* Form Card */}
-      <Card
-        style={{ borderRadius: 16, border: "none", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}
-        styles={{ body: { padding: 32 } }}
-      >
+      <Card style={{ borderRadius: 16, border: "none", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }} styles={{ body: { padding: 32 } }}>
         <Form layout="vertical" onFinish={handleSubmit(onFinish)}>
-          {/* Contract Parties */}
-          <Title level={5} style={{ marginBottom: 20, color: "#13c2c2" }}>
-            🤝 Bên thuê & Phòng
-          </Title>
+          <Title level={5} style={{ marginBottom: 20, color: "#13c2c2" }}>🤝 Bên thuê & Phòng</Title>
 
           <Row gutter={24}>
             <Col xs={24} md={12}>
@@ -125,22 +109,26 @@ export function ContractFormPage() {
                 help={errors.room?.message}
                 style={{ marginBottom: 20 }}
               >
-                <Select
-                  placeholder="Chọn phòng"
-                  size="large"
-                  style={{ borderRadius: 10 }}
-                  showSearch
-                  optionFilterProp="children"
-                >
-                  {roomsData?.results?.map((r: Room) => (
-                    <Select.Option key={r.id} value={r.id}>
-                      <Space>
-                        <HomeOutlined />
-                        {r.room_number} - {r.status_display || r.status}
-                      </Space>
-                    </Select.Option>
-                  ))}
-                </Select>
+                <Controller
+                  name="room"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      placeholder="Chọn phòng"
+                      size="large"
+                      style={{ borderRadius: 10 }}
+                      showSearch
+                      optionFilterProp="children"
+                    >
+                      {roomsData?.results?.map((r: Room) => (
+                        <Select.Option key={r.id} value={r.id}>
+                          <Space><HomeOutlined />{r.room_number} - {r.status_display || r.status}</Space>
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  )}
+                />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
@@ -151,32 +139,33 @@ export function ContractFormPage() {
                 help={errors.tenant?.message}
                 style={{ marginBottom: 20 }}
               >
-                <Select
-                  placeholder="Chọn người thuê"
-                  size="large"
-                  style={{ borderRadius: 10 }}
-                  showSearch
-                  optionFilterProp="children"
-                >
-                  {tenantsData?.results?.map((t: Tenant) => (
-                    <Select.Option key={t.id} value={t.id}>
-                      <Space>
-                        <TeamOutlined />
-                        {t.full_name} - {t.phone}
-                      </Space>
-                    </Select.Option>
-                  ))}
-                </Select>
+                <Controller
+                  name="tenant"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      placeholder="Chọn người thuê"
+                      size="large"
+                      style={{ borderRadius: 10 }}
+                      showSearch
+                      optionFilterProp="children"
+                    >
+                      {tenantsData?.results?.map((t: Tenant) => (
+                        <Select.Option key={t.id} value={t.id}>
+                          <Space><TeamOutlined />{t.full_name} - {t.phone}</Space>
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  )}
+                />
               </Form.Item>
             </Col>
           </Row>
 
           <Divider style={{ margin: "8px 0 24px" }} />
 
-          {/* Contract Details */}
-          <Title level={5} style={{ marginBottom: 20, color: "#13c2c2" }}>
-            📅 Chi tiết hợp đồng
-          </Title>
+          <Title level={5} style={{ marginBottom: 20, color: "#13c2c2" }}>📅 Chi tiết hợp đồng</Title>
 
           <Row gutter={24}>
             <Col xs={24} md={12}>
@@ -187,10 +176,12 @@ export function ContractFormPage() {
                 help={errors.start_date?.message}
                 style={{ marginBottom: 20 }}
               >
-                <Input
-                  type="date"
-                  size="large"
-                  style={{ borderRadius: 10 }}
+                <Controller
+                  name="start_date"
+                  control={control}
+                  render={({ field }) => (
+                    <Input {...field} type="date" size="large" style={{ borderRadius: 10 }} />
+                  )}
                 />
               </Form.Item>
             </Col>
@@ -202,10 +193,12 @@ export function ContractFormPage() {
                 help={errors.end_date?.message}
                 style={{ marginBottom: 20 }}
               >
-                <Input
-                  type="date"
-                  size="large"
-                  style={{ borderRadius: 10 }}
+                <Controller
+                  name="end_date"
+                  control={control}
+                  render={({ field }) => (
+                    <Input {...field} type="date" size="large" style={{ borderRadius: 10 }} />
+                  )}
                 />
               </Form.Item>
             </Col>
@@ -220,24 +213,23 @@ export function ContractFormPage() {
                 help={errors.monthly_rent?.message}
                 style={{ marginBottom: 20 }}
               >
-                <Input
-                  placeholder="Nhập tiền thuê hàng tháng"
-                  size="large"
-                  maxLength={50}
-                  style={{ borderRadius: 10 }}
+                <Controller
+                  name="monthly_rent"
+                  control={control}
+                  render={({ field }) => (
+                    <Input {...field} placeholder="Nhập tiền thuê hàng tháng" size="large" maxLength={50} style={{ borderRadius: 10 }} />
+                  )}
                 />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item
-                label={<Text style={{ fontWeight: 500 }}>Tiền cọc (VNĐ)</Text>}
-                style={{ marginBottom: 20 }}
-              >
-                <Input
-                  placeholder="Nhập tiền cọc (nếu có)"
-                  size="large"
-                  maxLength={50}
-                  style={{ borderRadius: 10 }}
+              <Form.Item label={<Text style={{ fontWeight: 500 }}>Tiền cọc (VNĐ)</Text>} style={{ marginBottom: 20 }}>
+                <Controller
+                  name="deposit_amount"
+                  control={control}
+                  render={({ field }) => (
+                    <Input {...field} placeholder="Nhập tiền cọc (nếu có)" size="large" maxLength={50} style={{ borderRadius: 10 }} />
+                  )}
                 />
               </Form.Item>
             </Col>
@@ -245,55 +237,30 @@ export function ContractFormPage() {
 
           <Divider style={{ margin: "8px 0 24px" }} />
 
-          {/* Additional Info */}
-          <Title level={5} style={{ marginBottom: 20, color: "#13c2c2" }}>
-            📝 Điều khoản & Ghi chú
-          </Title>
+          <Title level={5} style={{ marginBottom: 20, color: "#13c2c2" }}>📝 Điều khoản & Ghi chú</Title>
 
-          <Form.Item
-            label={<Text style={{ fontWeight: 500 }}>Điều khoản hợp đồng</Text>}
-            style={{ marginBottom: 20 }}
-          >
-            <TextArea
-              rows={4}
-              placeholder="Nhập các điều khoản của hợp đồng"
-              maxLength={2000}
-              showCount
-              style={{ borderRadius: 10 }}
+          <Form.Item label={<Text style={{ fontWeight: 500 }}>Điều khoản hợp đồng</Text>} style={{ marginBottom: 20 }}>
+            <Controller
+              name="terms"
+              control={control}
+              render={({ field }) => (
+                <TextArea {...field} rows={4} placeholder="Nhập các điều khoản của hợp đồng" maxLength={2000} showCount style={{ borderRadius: 10 }} />
+              )}
             />
           </Form.Item>
 
-          <Form.Item
-            label={<Text style={{ fontWeight: 500 }}>Ghi chú</Text>}
-            style={{ marginBottom: 28 }}
-          >
-            <TextArea
-              rows={2}
-              placeholder="Ghi chú thêm về hợp đồng"
-              maxLength={1000}
-              showCount
-              style={{ borderRadius: 10 }}
+          <Form.Item label={<Text style={{ fontWeight: 500 }}>Ghi chú</Text>} style={{ marginBottom: 28 }}>
+            <Controller
+              name="notes"
+              control={control}
+              render={({ field }) => (
+                <TextArea {...field} rows={2} placeholder="Ghi chú thêm về hợp đồng" maxLength={1000} showCount style={{ borderRadius: 10 }} />
+              )}
             />
           </Form.Item>
 
-          {/* Action Buttons */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: 12,
-              paddingTop: 16,
-              borderTop: "1px solid #f0f0f0",
-            }}
-          >
-            <Button
-              size="large"
-              icon={<ArrowLeftOutlined />}
-              onClick={() => navigate("/contracts")}
-              style={{ borderRadius: 10, minWidth: 120 }}
-            >
-              Hủy bỏ
-            </Button>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, paddingTop: 16, borderTop: "1px solid #f0f0f0" }}>
+            <Button size="large" icon={<ArrowLeftOutlined />} onClick={() => navigate("/contracts")} style={{ borderRadius: 10, minWidth: 120 }}>Hủy bỏ</Button>
             <Button
               type="primary"
               size="large"
