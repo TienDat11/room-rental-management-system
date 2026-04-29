@@ -4,5 +4,9 @@
   "framework": "vite",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "https://room-rental-management-system.onrender.com/api/$1" }
+  ],
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
