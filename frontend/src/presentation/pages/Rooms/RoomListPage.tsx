@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Table, Button, Space, Tag, Card, Typography, Popconfirm, message, Input, Empty, Skeleton } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, HomeOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useRooms, useDeleteRoom } from "@/application/hooks/useRooms";
+import { useAuthStore } from "@/application/stores/authStore";
 import type { Room } from "@/domain/models/Room";
 import type { ColumnsType } from "antd/es/table";
 
@@ -32,7 +33,9 @@ export function RoomListPage() {
   const [pageSize, setPageSize] = useState(10);
   const [searchText, setSearchText] = useState("");
   const { data, isLoading } = useRooms();
+  const { user } = useAuthStore();
   const deleteMutation = useDeleteRoom();
+  const canManage = user?.role === "ADMIN" || user?.role === "LANDLORD";
 
   const handleDelete = async (id: number) => {
     try {
@@ -123,6 +126,7 @@ export function RoomListPage() {
       key: "action",
       width: 180,
       render: (_: unknown, record: Room) => (
+        canManage ? (
         <Space size={4}>
           <Button
             type="text"
@@ -141,10 +145,13 @@ export function RoomListPage() {
             okButtonProps={{ danger: true }}
           >
             <Button type="text" danger icon={<DeleteOutlined />}>
-              Xóa
-            </Button>
-          </Popconfirm>
+            Xóa
+          </Button>
+        </Popconfirm>
         </Space>
+        ) : (
+          <Text type="secondary">Chỉ xem</Text>
+        )
       ),
     },
   ];
@@ -206,14 +213,16 @@ export function RoomListPage() {
             >
               Làm mới
             </Button>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => navigate("/rooms/new")}
-              style={{ borderRadius: 8, fontWeight: 500 }}
-            >
-              Thêm Phòng Mới
-            </Button>
+            {canManage && (
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => navigate("/rooms/new")}
+                style={{ borderRadius: 8, fontWeight: 500 }}
+              >
+                Thêm Phòng Mới
+              </Button>
+            )}
           </Space>
         </div>
 
@@ -237,14 +246,16 @@ export function RoomListPage() {
                     <div>
                       <Text type="secondary">Chưa có phòng nào</Text>
                       <br />
-                      <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={() => navigate("/rooms/new")}
-                        style={{ marginTop: 12, borderRadius: 8 }}
-                      >
-                        Thêm phòng đầu tiên
-                      </Button>
+                      {canManage && (
+                        <Button
+                          type="primary"
+                          icon={<PlusOutlined />}
+                          onClick={() => navigate("/rooms/new")}
+                          style={{ marginTop: 12, borderRadius: 8 }}
+                        >
+                          Thêm phòng đầu tiên
+                        </Button>
+                      )}
                     </div>
                   }
                 />

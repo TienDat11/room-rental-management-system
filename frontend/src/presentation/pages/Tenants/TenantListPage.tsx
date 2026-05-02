@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Table, Button, Space, Tag, Card, Typography, Popconfirm, message, Input, Empty, Skeleton } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, TeamOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useTenants, useDeleteTenant } from "@/application/hooks/useTenants";
+import { useAuthStore } from "@/application/stores/authStore";
 import type { Tenant } from "@/domain/models/Tenant";
 import type { ColumnsType } from "antd/es/table";
 
@@ -14,7 +15,9 @@ export function TenantListPage() {
   const [pageSize, setPageSize] = useState(10);
   const [searchText, setSearchText] = useState("");
   const { data, isLoading } = useTenants();
+  const { user } = useAuthStore();
   const deleteMutation = useDeleteTenant();
+  const canManage = user?.role === "ADMIN" || user?.role === "LANDLORD";
 
   const handleDelete = async (id: number) => {
     try {
@@ -97,6 +100,7 @@ export function TenantListPage() {
       key: "action",
       width: 180,
       render: (_: unknown, record: Tenant) => (
+        canManage ? (
         <Space size={4}>
           <Button
             type="text"
@@ -115,10 +119,13 @@ export function TenantListPage() {
             okButtonProps={{ danger: true }}
           >
             <Button type="text" danger icon={<DeleteOutlined />}>
-              Xóa
-            </Button>
-          </Popconfirm>
+            Xóa
+          </Button>
+        </Popconfirm>
         </Space>
+        ) : (
+          <Text type="secondary">Chỉ xem</Text>
+        )
       ),
     },
   ];
@@ -180,14 +187,16 @@ export function TenantListPage() {
             >
               Làm mới
             </Button>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => navigate("/tenants/new")}
-              style={{ borderRadius: 8, fontWeight: 500, background: "#722ed1", borderColor: "#722ed1" }}
-            >
-              Thêm Người Thuê
-            </Button>
+            {canManage && (
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => navigate("/tenants/new")}
+                style={{ borderRadius: 8, fontWeight: 500, background: "#722ed1", borderColor: "#722ed1" }}
+              >
+                Thêm Người Thuê
+              </Button>
+            )}
           </Space>
         </div>
 
@@ -211,14 +220,16 @@ export function TenantListPage() {
                     <div>
                       <Text type="secondary">Chưa có người thuê nào</Text>
                       <br />
-                      <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={() => navigate("/tenants/new")}
-                        style={{ marginTop: 12, borderRadius: 8, background: "#722ed1", borderColor: "#722ed1" }}
-                      >
-                        Thêm người thuê đầu tiên
-                      </Button>
+                      {canManage && (
+                        <Button
+                          type="primary"
+                          icon={<PlusOutlined />}
+                          onClick={() => navigate("/tenants/new")}
+                          style={{ marginTop: 12, borderRadius: 8, background: "#722ed1", borderColor: "#722ed1" }}
+                        >
+                          Thêm người thuê đầu tiên
+                        </Button>
+                      )}
                     </div>
                   }
                 />

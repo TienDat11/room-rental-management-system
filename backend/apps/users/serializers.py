@@ -44,6 +44,14 @@ class UserCreateSerializer(serializers.ModelSerializer):
         return user
 
 
+class PublicUserRegistrationSerializer(UserCreateSerializer):
+    role = serializers.ChoiceField(
+        choices=[User.Role.LANDLORD, User.Role.TENANT],
+        default=User.Role.TENANT,
+        required=False,
+    )
+
+
 class UserUpdateSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=254)
     full_name = serializers.CharField(max_length=100, required=False, allow_blank=True)

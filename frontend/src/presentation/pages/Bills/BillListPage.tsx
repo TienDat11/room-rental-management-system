@@ -4,6 +4,7 @@ import { Table, Button, Space, Tag, Card, Typography, Popconfirm, message, Modal
 import { PlusOutlined, DeleteOutlined, DollarOutlined, SearchOutlined, ReloadOutlined, CheckCircleOutlined, ClockCircleOutlined, WarningOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { useBills, useDeleteBill, usePayBill } from "@/application/hooks/useBills";
+import { useAuthStore } from "@/application/stores/authStore";
 import type { Bill, PaymentCreate } from "@/domain/models/Bill";
 import type { ColumnsType } from "antd/es/table";
 
@@ -36,8 +37,10 @@ export function BillListPage() {
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
   const [payForm] = Form.useForm();
   const { data, isLoading } = useBills();
+  const { user } = useAuthStore();
   const deleteMutation = useDeleteBill();
   const payMutation = usePayBill();
+  const canManage = user?.role === "ADMIN" || user?.role === "LANDLORD";
 
   const handleDelete = async (id: number) => {
     try {
@@ -185,18 +188,20 @@ export function BillListPage() {
               Thanh toán
             </Button>
           )}
-          <Popconfirm
-            title="Xác nhận xóa"
-            description="Bạn có chắc muốn xóa hóa đơn này?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Xóa"
-            cancelText="Hủy"
-            okButtonProps={{ danger: true }}
-          >
-            <Button type="text" danger size="small" icon={<DeleteOutlined />}>
-              Xóa
-            </Button>
-          </Popconfirm>
+          {canManage && (
+            <Popconfirm
+              title="Xác nhận xóa"
+              description="Bạn có chắc muốn xóa hóa đơn này?"
+              onConfirm={() => handleDelete(record.id)}
+              okText="Xóa"
+              cancelText="Hủy"
+              okButtonProps={{ danger: true }}
+            >
+              <Button type="text" danger size="small" icon={<DeleteOutlined />}>
+                Xóa
+              </Button>
+            </Popconfirm>
+          )}
         </Space>
       ),
     },
@@ -341,14 +346,16 @@ export function BillListPage() {
             >
               Làm mới
             </Button>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => navigate("/bills/new")}
-              style={{ borderRadius: 8, fontWeight: 500, background: "#eb2f96", borderColor: "#eb2f96" }}
-            >
-              Tạo Hóa Đơn
-            </Button>
+            {canManage && (
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => navigate("/bills/new")}
+                style={{ borderRadius: 8, fontWeight: 500, background: "#eb2f96", borderColor: "#eb2f96" }}
+              >
+                Tạo Hóa Đơn
+              </Button>
+            )}
           </Space>
         </div>
 
@@ -372,14 +379,16 @@ export function BillListPage() {
                     <div>
                       <Text type="secondary">Chưa có hóa đơn nào</Text>
                       <br />
-                      <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={() => navigate("/bills/new")}
-                        style={{ marginTop: 12, borderRadius: 8, background: "#eb2f96", borderColor: "#eb2f96" }}
-                      >
-                        Tạo hóa đơn đầu tiên
-                      </Button>
+                      {canManage && (
+                        <Button
+                          type="primary"
+                          icon={<PlusOutlined />}
+                          onClick={() => navigate("/bills/new")}
+                          style={{ marginTop: 12, borderRadius: 8, background: "#eb2f96", borderColor: "#eb2f96" }}
+                        >
+                          Tạo hóa đơn đầu tiên
+                        </Button>
+                      )}
                     </div>
                   }
                 />

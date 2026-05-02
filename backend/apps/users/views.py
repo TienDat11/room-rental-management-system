@@ -2,10 +2,16 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 
 from .models import User
-from .serializers import UserSerializer, UserCreateSerializer, UserUpdateSerializer
+from .serializers import (
+    PublicUserRegistrationSerializer,
+    UserCreateSerializer,
+    UserSerializer,
+    UserUpdateSerializer,
+)
 
 
 class IsAdminUser(IsAuthenticated):
@@ -14,13 +20,13 @@ class IsAdminUser(IsAuthenticated):
 
 
 class RegisterView(viewsets.GenericViewSet):
-    serializer_class = UserCreateSerializer
+    serializer_class = PublicUserRegistrationSerializer
     permission_classes = [AllowAny]
 
     @extend_schema(
-        request=UserCreateSerializer,
+        request=PublicUserRegistrationSerializer,
         responses={201: UserSerializer},
-        description="Register a new user (Admin only for creating other roles)",
+        description="Register a new landlord or tenant account",
     )
     def create(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -38,6 +44,18 @@ class MeView(viewsets.GenericViewSet):
     def list(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
+
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        request=None,
+        responses={204: OpenApiResponse(description="Logged out")},
+        description="Client-side JWT logout endpoint",
+    )
+    def post(self, request):
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class UserViewSet(viewsets.ModelViewSet):

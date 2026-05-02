@@ -24,6 +24,16 @@ class TestContractList:
         assert response.status_code == 200
         assert response.data["count"] == 1
 
+    def test_list_contracts_as_tenant_scoped_to_self(self, tenant_client, tenant_user, tenant, contract):
+        """Tenant can list their own contracts."""
+        tenant.user = tenant_user
+        tenant.save()
+
+        response = tenant_client.get("/api/contracts/")
+
+        assert response.status_code == 200
+        assert response.data["count"] == 1
+
     def test_list_contracts_unauthenticated(self, api_client, contract):
         """Unauthenticated user cannot list contracts."""
         response = api_client.get("/api/contracts/")

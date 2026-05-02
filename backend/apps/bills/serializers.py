@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from rest_framework import serializers
 from django.core.validators import MinValueValidator
 from .models import Bill, Payment
@@ -42,16 +44,16 @@ class BillSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "total_amount", "created_at", "updated_at"]
 
-    def get_electricity_usage(self, obj):
+    def get_electricity_usage(self, obj) -> Decimal:
         return obj.electricity_current - obj.electricity_previous
 
-    def get_water_usage(self, obj):
+    def get_water_usage(self, obj) -> Decimal:
         return obj.water_current - obj.water_previous
 
-    def get_electricity_cost(self, obj):
+    def get_electricity_cost(self, obj) -> Decimal:
         return (obj.electricity_current - obj.electricity_previous) * obj.electricity_price_per_unit
 
-    def get_water_cost(self, obj):
+    def get_water_cost(self, obj) -> Decimal:
         return (obj.water_current - obj.water_previous) * obj.water_price_per_unit
 
 

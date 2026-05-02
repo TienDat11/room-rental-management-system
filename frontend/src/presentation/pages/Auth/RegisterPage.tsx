@@ -45,6 +45,7 @@ export function RegisterPage() {
       <style>{gradientAnimation}</style>
 
       <div
+        className="auth-page auth-register-page"
         style={{
           display: "flex",
           minHeight: "100vh",
@@ -52,6 +53,7 @@ export function RegisterPage() {
         }}
       >
         <div
+          className="auth-hero"
           style={{
             flex: "1 1 50%",
             display: "flex",
@@ -89,7 +91,7 @@ export function RegisterPage() {
             Tạo tài khoản để bắt đầu quản lý phòng trọ hiệu quả và chuyên nghiệp.
           </Paragraph>
 
-          <div style={{ maxWidth: 360, width: "100%" }}>
+          <div className="auth-steps" style={{ maxWidth: 360, width: "100%" }}>
             <Steps
               direction="vertical"
               size="small"
@@ -116,7 +118,8 @@ export function RegisterPage() {
         </div>
 
         <div
-          style={{ flex: "1 1 50%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", padding: "40px 60px", background: "#fff", overflowY: "auto" }}
+          className="auth-panel auth-register-panel"
+          style={{ flex: "1 1 50%", display: "flex", flexDirection: "column", justifyContent: "flex-start", alignItems: "center", padding: "40px 60px", background: "#fff", overflowY: "auto" }}
         >
           <div style={{ width: "100%", maxWidth: 440 }}>
             <Button
@@ -157,7 +160,7 @@ export function RegisterPage() {
                   />
                 </Form.Item>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                <div className="auth-form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                   <Form.Item
                     label={<Text style={{ fontWeight: 500 }}>Email</Text>}
                     validateStatus={errors.email ? "error" : ""}
@@ -213,7 +216,7 @@ export function RegisterPage() {
                   />
                 </Form.Item>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                <div className="auth-form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                   <Form.Item
                     label={<Text style={{ fontWeight: 500 }}>Mật khẩu</Text>}
                     validateStatus={errors.password ? "error" : ""}

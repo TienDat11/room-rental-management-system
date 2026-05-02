@@ -3,9 +3,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConfigProvider, App as AntApp } from "antd";
 import viVN from "antd/locale/vi_VN";
 import { Suspense, lazy } from "react";
+import type React from "react";
 import { Spin } from "antd";
 import { theme } from "@/shared/theme";
 import { MainLayout } from "./presentation/components/Layout/MainLayout";
+import { useAuthStore } from "@/application/stores/authStore";
+import type { UserRole } from "@/domain/models/User";
 
 const LoginPage = lazy(() =>
   import("./presentation/pages/Auth/LoginPage").then((m) => ({
@@ -62,6 +65,11 @@ const BillFormPage = lazy(() =>
     default: m.BillFormPage,
   }))
 );
+const UserManagementPage = lazy(() =>
+  import("./presentation/pages/Users/UserManagementPage").then((m) => ({
+    default: m.UserManagementPage,
+  }))
+);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -80,6 +88,20 @@ function PageLoader() {
   );
 }
 
+function RequireRole({ roles, children }: { roles: UserRole[]; children: React.ReactElement }) {
+  const { user, isAuthenticated } = useAuthStore();
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!user || !roles.includes(user.role)) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+}
+
 function App() {
   return (
     <ConfigProvider theme={theme} locale={viVN}>
@@ -93,16 +115,17 @@ function App() {
                 <Route path="/" element={<MainLayout />}>
                   <Route index element={<DashboardPage />} />
                   <Route path="rooms" element={<RoomListPage />} />
-                  <Route path="rooms/new" element={<RoomFormPage />} />
-                  <Route path="rooms/:id/edit" element={<RoomFormPage />} />
+                  <Route path="rooms/new" element={<RequireRole roles={["ADMIN", "LANDLORD"]}><RoomFormPage /></RequireRole>} />
+                  <Route path="rooms/:id/edit" element={<RequireRole roles={["ADMIN", "LANDLORD"]}><RoomFormPage /></RequireRole>} />
                   <Route path="tenants" element={<TenantListPage />} />
-                  <Route path="tenants/new" element={<TenantFormPage />} />
-                  <Route path="tenants/:id/edit" element={<TenantFormPage />} />
+                  <Route path="tenants/new" element={<RequireRole roles={["ADMIN", "LANDLORD"]}><TenantFormPage /></RequireRole>} />
+                  <Route path="tenants/:id/edit" element={<RequireRole roles={["ADMIN", "LANDLORD"]}><TenantFormPage /></RequireRole>} />
                   <Route path="contracts" element={<ContractListPage />} />
-                  <Route path="contracts/new" element={<ContractFormPage />} />
-                  <Route path="contracts/:id/edit" element={<ContractFormPage />} />
+                  <Route path="contracts/new" element={<RequireRole roles={["ADMIN", "LANDLORD"]}><ContractFormPage /></RequireRole>} />
+                  <Route path="contracts/:id/edit" element={<RequireRole roles={["ADMIN", "LANDLORD"]}><ContractFormPage /></RequireRole>} />
                   <Route path="bills" element={<BillListPage />} />
-                  <Route path="bills/new" element={<BillFormPage />} />
+                  <Route path="bills/new" element={<RequireRole roles={["ADMIN", "LANDLORD"]}><BillFormPage /></RequireRole>} />
+                  <Route path="users" element={<RequireRole roles={["ADMIN"]}><UserManagementPage /></RequireRole>} />
                 </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

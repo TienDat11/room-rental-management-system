@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Table, Button, Space, Tag, Card, Typography, Popconfirm, message, Input, Empty, Skeleton } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, FileTextOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useContracts, useDeleteContract } from "@/application/hooks/useContracts";
+import { useAuthStore } from "@/application/stores/authStore";
 import type { Contract } from "@/domain/models/Contract";
 import type { ColumnsType } from "antd/es/table";
 
@@ -32,7 +33,9 @@ export function ContractListPage() {
   const [pageSize, setPageSize] = useState(10);
   const [searchText, setSearchText] = useState("");
   const { data, isLoading } = useContracts();
+  const { user } = useAuthStore();
   const deleteMutation = useDeleteContract();
+  const canManage = user?.role === "ADMIN" || user?.role === "LANDLORD";
 
   const handleDelete = async (id: number) => {
     try {
@@ -119,6 +122,7 @@ export function ContractListPage() {
       key: "action",
       width: 180,
       render: (_: unknown, record: Contract) => (
+        canManage ? (
         <Space size={4}>
           <Button
             type="text"
@@ -137,10 +141,13 @@ export function ContractListPage() {
             okButtonProps={{ danger: true }}
           >
             <Button type="text" danger icon={<DeleteOutlined />}>
-              Xóa
-            </Button>
-          </Popconfirm>
+            Xóa
+          </Button>
+        </Popconfirm>
         </Space>
+        ) : (
+          <Text type="secondary">Chỉ xem</Text>
+        )
       ),
     },
   ];
@@ -202,14 +209,16 @@ export function ContractListPage() {
             >
               Làm mới
             </Button>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => navigate("/contracts/new")}
-              style={{ borderRadius: 8, fontWeight: 500, background: "#13c2c2", borderColor: "#13c2c2" }}
-            >
-              Tạo Hợp Đồng
-            </Button>
+            {canManage && (
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => navigate("/contracts/new")}
+                style={{ borderRadius: 8, fontWeight: 500, background: "#13c2c2", borderColor: "#13c2c2" }}
+              >
+                Tạo Hợp Đồng
+              </Button>
+            )}
           </Space>
         </div>
 
@@ -233,14 +242,16 @@ export function ContractListPage() {
                     <div>
                       <Text type="secondary">Chưa có hợp đồng nào</Text>
                       <br />
-                      <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={() => navigate("/contracts/new")}
-                        style={{ marginTop: 12, borderRadius: 8, background: "#13c2c2", borderColor: "#13c2c2" }}
-                      >
-                        Tạo hợp đồng đầu tiên
-                      </Button>
+                      {canManage && (
+                        <Button
+                          type="primary"
+                          icon={<PlusOutlined />}
+                          onClick={() => navigate("/contracts/new")}
+                          style={{ marginTop: 12, borderRadius: 8, background: "#13c2c2", borderColor: "#13c2c2" }}
+                        >
+                          Tạo hợp đồng đầu tiên
+                        </Button>
+                      )}
                     </div>
                   }
                 />

@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from datetime import timedelta
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -72,7 +73,17 @@ import dj_database_url
 # Neon PostgreSQL requires SSL
 DATABASE_URL = os.environ.get("DATABASE_URL", f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
 if DATABASE_URL.startswith("postgres"):
-    DATABASE_URL += "&sslmode=require" if "?" in DATABASE_URL else "?sslmode=require"
+    parts = urlsplit(DATABASE_URL)
+    query = [
+        (key, value)
+        for key, value in parse_qsl(parts.query, keep_blank_values=True)
+        if key != "prepare_threshold"
+    ]
+    if not any(key == "sslmode" for key, _ in query):
+        query.append(("sslmode", "require"))
+    DATABASE_URL = urlunsplit(
+        (parts.scheme, parts.netloc, parts.path, urlencode(query), parts.fragment)
+    )
 
 DATABASES = {
     "default": dj_database_url.config(

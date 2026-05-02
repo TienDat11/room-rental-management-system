@@ -54,7 +54,7 @@ export const registerSchema = z
       )
       .optional()
       .or(z.literal("")),
-    role: z.enum(["ADMIN", "LANDLORD", "TENANT"]),
+    role: z.enum(["LANDLORD", "TENANT"]),
   })
   .refine((data) => data.password === data.password_confirm, {
     message: "Mật khẩu xác nhận không khớp với mật khẩu đã nhập",

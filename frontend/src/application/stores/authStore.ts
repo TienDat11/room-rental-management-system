@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { User } from "../../domain/models/User";
+import { STORAGE_KEYS } from "@/shared/constants/storage";
 
 interface AuthState {
   user: User | null;
@@ -26,7 +27,7 @@ export const useAuthStore = create<AuthState>()(
         set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false }),
     }),
     {
-      name: "auth-storage",
+      name: STORAGE_KEYS.auth,
     }
   )
 );

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type React from "react";
 import { Outlet, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Layout, Menu, Typography, Avatar, Dropdown, Breadcrumb, Badge, Space, theme as antdTheme } from "antd";
 import {
@@ -13,20 +14,39 @@ import {
   MenuUnfoldOutlined,
   DashboardOutlined,
   SettingOutlined,
+  SolutionOutlined,
 } from "@ant-design/icons";
 import { useAuthStore } from "@/application/stores/authStore";
+import type { UserRole } from "@/domain/models/User";
 
 const { Sider, Content, Header, Footer } = Layout;
 const { Title, Text } = Typography;
 const { useToken } = antdTheme;
 
-const menuItems = [
-  { key: "/", icon: <DashboardOutlined />, label: "Dashboard" },
-  { key: "/rooms", icon: <HomeOutlined />, label: "Quản lý phòng" },
-  { key: "/tenants", icon: <TeamOutlined />, label: "Người thuê" },
-  { key: "/contracts", icon: <FileTextOutlined />, label: "Hợp đồng" },
-  { key: "/bills", icon: <DollarOutlined />, label: "Hóa đơn" },
-];
+const menuByRole: Record<UserRole, { key: string; icon: React.ReactNode; label: string }[]> = {
+  ADMIN: [
+    { key: "/", icon: <DashboardOutlined />, label: "Dashboard" },
+    { key: "/users", icon: <SolutionOutlined />, label: "Tài khoản" },
+    { key: "/rooms", icon: <HomeOutlined />, label: "Phòng" },
+    { key: "/tenants", icon: <TeamOutlined />, label: "Người thuê" },
+    { key: "/contracts", icon: <FileTextOutlined />, label: "Hợp đồng" },
+    { key: "/bills", icon: <DollarOutlined />, label: "Hóa đơn" },
+  ],
+  LANDLORD: [
+    { key: "/", icon: <DashboardOutlined />, label: "Dashboard" },
+    { key: "/rooms", icon: <HomeOutlined />, label: "Quản lý phòng" },
+    { key: "/tenants", icon: <TeamOutlined />, label: "Người thuê" },
+    { key: "/contracts", icon: <FileTextOutlined />, label: "Hợp đồng" },
+    { key: "/bills", icon: <DollarOutlined />, label: "Hóa đơn" },
+  ],
+  TENANT: [
+    { key: "/", icon: <DashboardOutlined />, label: "Dashboard" },
+    { key: "/rooms", icon: <HomeOutlined />, label: "Phòng của tôi" },
+    { key: "/tenants", icon: <TeamOutlined />, label: "Thông tin thuê" },
+    { key: "/contracts", icon: <FileTextOutlined />, label: "Hợp đồng của tôi" },
+    { key: "/bills", icon: <DollarOutlined />, label: "Hóa đơn của tôi" },
+  ],
+};
 
 const pageTitles: Record<string, string> = {
   "/": "Dashboard",
@@ -34,6 +54,7 @@ const pageTitles: Record<string, string> = {
   "/tenants": "Quản lý người thuê",
   "/contracts": "Quản lý hợp đồng",
   "/bills": "Quản lý hóa đơn",
+  "/users": "Quản lý tài khoản",
 };
 
 export function MainLayout() {
@@ -83,6 +104,7 @@ export function MainLayout() {
   // Get current page title for breadcrumb
   const currentPath = location.pathname.split("/").slice(0, 2).join("/") || "/";
   const pageTitle = pageTitles[currentPath] || "Dashboard";
+  const menuItems = user ? menuByRole[user.role] : [];
 
   return (
     <Layout style={{ minHeight: "100vh" }}>

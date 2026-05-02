@@ -14,7 +14,12 @@ class IsLandlordOrAdmin(permissions.BasePermission):
 
 class RoomViewSet(viewsets.ModelViewSet):
     queryset = Room.objects.all()
-    permission_classes = [permissions.IsAuthenticated, IsLandlordOrAdmin]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_permissions(self):
+        if self.action in ["list", "retrieve"] and getattr(self.request.user, "is_tenant", False):
+            return [permissions.IsAuthenticated()]
+        return [permissions.IsAuthenticated(), IsLandlordOrAdmin()]
 
     def get_serializer_class(self):
         if self.action == "create":
@@ -30,6 +35,8 @@ class RoomViewSet(viewsets.ModelViewSet):
         queryset = Room.objects.select_related("landlord").prefetch_related("images")
         if user.is_admin:
             return queryset
+        if user.is_tenant:
+            return queryset.filter(tenant__user=user)
         return queryset.filter(landlord=user)
 
     def perform_create(self, serializer):

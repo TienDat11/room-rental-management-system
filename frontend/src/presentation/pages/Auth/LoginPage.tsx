@@ -44,6 +44,7 @@ export function LoginPage() {
       <style>{gradientAnimation}</style>
 
       <div
+        className="auth-page"
         style={{
           display: "flex",
           minHeight: "100vh",
@@ -51,6 +52,7 @@ export function LoginPage() {
         }}
       >
         <div
+          className="auth-hero"
           style={{
             flex: "1 1 55%",
             display: "flex",
@@ -89,7 +91,7 @@ export function LoginPage() {
             Hệ thống quản lý phòng trọ thông minh, giúp bạn quản lý phòng, người thuê, hợp đồng và hóa đơn một cách dễ dàng.
           </Paragraph>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 360 }}>
+          <div className="auth-feature-list" style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 360 }}>
             {[
               { icon: "🏠", text: "Quản lý phòng trọ trực quan" },
               { icon: "👥", text: "Theo dõi người thuê chi tiết" },
@@ -108,6 +110,7 @@ export function LoginPage() {
         </div>
 
         <div
+          className="auth-panel"
           style={{ flex: "1 1 45%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", padding: "40px 60px", background: "#fff" }}
         >
           <div style={{ width: "100%", maxWidth: 400 }}>

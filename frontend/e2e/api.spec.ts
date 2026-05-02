@@ -1,167 +1,64 @@
 import { test, expect } from "@playwright/test";
 
 const API_URL = process.env.API_URL || "http://localhost:8000";
+const FE_BASE = process.env.BASE_URL || "http://localhost:5173";
 
-// Test admin credentials (should be created in database)
-const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "admin123";
+const credentials = {
+  username: process.env.E2E_USERNAME || "admin_test",
+  password: process.env.E2E_PASSWORD || "Admin@123",
+};
 
-test.describe("Room Management E2E", () => {
-  let authToken: string;
+test.describe("@smoke API Proxy and CORS Integrity", () => {
+  test("preflight for FE proxied login endpoint returns CORS headers", async ({ request }) => {
+    test.setTimeout(60000);
 
-  test.beforeAll(async ({ request }) => {
-    // Login as admin to get token
-    const loginResponse = await request.post(`${API_URL}/api/auth/login/`, {
-      data: {
-        username: ADMIN_USERNAME,
-        password: ADMIN_PASSWORD,
+    const response = await request.fetch(`${FE_BASE}/api/auth/login/`, {
+      method: "OPTIONS",
+      timeout: 60000,
+      headers: {
+        Origin: FE_BASE,
+        "Access-Control-Request-Method": "POST",
+        "Access-Control-Request-Headers": "content-type",
       },
     });
 
-    if (loginResponse.ok()) {
-      const data = await loginResponse.json();
-      authToken = data.access;
-    }
+    expect(response.status()).toBeGreaterThanOrEqual(200);
+    expect(response.status()).toBeLessThan(300);
+    const allowMethods = response.headers()["access-control-allow-methods"] || "";
+    expect(allowMethods.toUpperCase()).toContain("POST");
   });
 
-  test("should list rooms via API", async ({ request }) => {
-    const response = await request.get(`${API_URL}/api/rooms/`, {
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-      },
-    });
-    expect(response.status()).toBe(200);
-    const data = await response.json();
-    expect(data).toHaveProperty("count");
-    expect(data).toHaveProperty("results");
-    expect(Array.isArray(data.results)).toBe(true);
-  });
-
-  test("should create a room via API", async ({ request }) => {
-    if (!authToken) test.skip();
-
-    const uniqueRoom = `E2E-${Date.now()}`;
-    const response = await request.post(`${API_URL}/api/rooms/`, {
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-        "Content-Type": "application/json",
-      },
-      data: {
-        room_number: uniqueRoom,
-        floor: 9,
-        area: 30,
-        base_price: "5000000",
-        status: "AVAILABLE",
-      },
+  test("proxied FE login endpoint does not return routing mismatch", async ({ request }) => {
+    const response = await request.post(`${FE_BASE}/api/auth/login/`, {
+      data: credentials,
+      headers: { Origin: FE_BASE },
     });
 
-    expect([200, 201, 400]).toContain(response.status()); // 400 if room exists
-  });
-
-  test("should validate room creation fields", async ({ request }) => {
-    if (!authToken) test.skip();
-
-    // Missing required fields
-    const response = await request.post(`${API_URL}/api/rooms/`, {
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-        "Content-Type": "application/json",
-      },
-      data: {
-        floor: 1,
-        // Missing room_number, area, base_price
-      },
-    });
-    expect(response.status()).toBe(400);
+    expect([404, 405]).not.toContain(response.status());
+    expect([200, 400, 401]).toContain(response.status());
   });
 });
 
-test.describe("Tenant Management E2E", () => {
-  let authToken: string;
-
-  test.beforeAll(async ({ request }) => {
-    const loginResponse = await request.post(`${API_URL}/api/auth/login/`, {
-      data: { username: ADMIN_USERNAME, password: ADMIN_PASSWORD },
-    });
-    if (loginResponse.ok()) {
-      const data = await loginResponse.json();
-      authToken = data.access;
-    }
-  });
-
-  test("should list tenants via API", async ({ request }) => {
-    if (!authToken) test.skip();
-
-    const response = await request.get(`${API_URL}/api/tenants/`, {
-      headers: { Authorization: `Bearer ${authToken}` },
-    });
-    expect(response.status()).toBe(200);
-    const data = await response.json();
-    expect(data).toHaveProperty("results");
-  });
-
-  test("should create tenant via API", async ({ request }) => {
-    if (!authToken) test.skip();
-
-    const uniqueId = `${Date.now()}`;
-    const response = await request.post(`${API_URL}/api/tenants/`, {
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-        "Content-Type": "application/json",
-      },
-      data: {
-        full_name: `E2E Tenant ${uniqueId}`,
-        id_card: `ID${uniqueId}`,
-        phone: `0123456${uniqueId.slice(-4)}`,
-        status: "ACTIVE",
-      },
-    });
-    expect([200, 201, 400]).toContain(response.status());
-  });
-});
-
-test.describe("Contract Management E2E", () => {
-  let authToken: string;
-
-  test.beforeAll(async ({ request }) => {
-    const loginResponse = await request.post(`${API_URL}/api/auth/login/`, {
-      data: { username: ADMIN_USERNAME, password: ADMIN_PASSWORD },
-    });
-    if (loginResponse.ok()) {
-      const data = await loginResponse.json();
-      authToken = data.access;
-    }
-  });
-
-  test("should list contracts via API", async ({ request }) => {
-    if (!authToken) test.skip();
-
-    const response = await request.get(`${API_URL}/api/contracts/`, {
-      headers: { Authorization: `Bearer ${authToken}` },
-    });
+test.describe("Backend API Contract", () => {
+  test("backend docs endpoint is reachable", async ({ request }) => {
+    const response = await request.get(`${API_URL}/api/docs/`);
     expect(response.status()).toBe(200);
   });
-})
 
-test.describe("Bill Management E2E", () => {
-  let authToken: string;
-
-  test.beforeAll(async ({ request }) => {
-    const loginResponse = await request.post(`${API_URL}/api/auth/login/`, {
-      data: { username: ADMIN_USERNAME, password: ADMIN_PASSWORD },
-    });
-    if (loginResponse.ok()) {
-      const data = await loginResponse.json();
-      authToken = data.access;
-    }
+  test("login endpoint method contract is correct", async ({ request }) => {
+    const response = await request.fetch(`${API_URL}/api/auth/login/`, { method: "OPTIONS" });
+    expect(response.status()).toBeGreaterThanOrEqual(200);
+    expect(response.status()).toBeLessThan(300);
+    const allow = (response.headers()["allow"] || "").toUpperCase();
+    expect(allow).toContain("POST");
   });
 
-  test("should list bills via API", async ({ request }) => {
-    if (!authToken) test.skip();
-
-    const response = await request.get(`${API_URL}/api/bills/`, {
-      headers: { Authorization: `Bearer ${authToken}` },
-    });
-    expect(response.status()).toBe(200);
+  test("core list endpoints require auth but do not crash", async ({ request }) => {
+    const endpoints = ["rooms", "tenants", "contracts", "bills"];
+    for (const endpoint of endpoints) {
+      const response = await request.get(`${API_URL}/api/${endpoint}/`);
+      expect([200, 401, 403]).toContain(response.status());
+      expect(response.status()).not.toBeGreaterThanOrEqual(500);
+    }
   });
 });

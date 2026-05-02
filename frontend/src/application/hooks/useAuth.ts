@@ -3,6 +3,7 @@ import apiClient from "../../infrastructure/api/client";
 import type { User, LoginRequest, LoginResponse, RegisterRequest } from "../../domain/models/User";
 import { useAuthStore } from "../stores/authStore";
 import { queryKeys } from "../../infrastructure/api/queryKeys";
+import { API_ENDPOINTS } from "@/shared/constants/api";
 
 export function useMe() {
   const { isAuthenticated } = useAuthStore();
@@ -19,12 +20,12 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: async (data: LoginRequest) => {
-      const res = await apiClient.post<LoginResponse>("/auth/login/", data);
+      const res = await apiClient.post<LoginResponse>(API_ENDPOINTS.auth.login, data);
       return res.data;
     },
     onSuccess: async (tokens) => {
       setTokens(tokens.access, tokens.refresh);
-      const { data } = await apiClient.get<User>("/auth/me/");
+      const { data } = await apiClient.get<User>(API_ENDPOINTS.auth.me);
       setUser(data);
       queryClient.invalidateQueries({ queryKey: queryKeys.users.me() });
     },
@@ -33,7 +34,7 @@ export function useLogin() {
 
 export function useRegister() {
   return useMutation({
-    mutationFn: (data: RegisterRequest) => apiClient.post("/auth/register/", data),
+    mutationFn: (data: RegisterRequest) => apiClient.post(API_ENDPOINTS.auth.register, data),
   });
 }
 
@@ -45,7 +46,7 @@ export function useLogout() {
     mutationFn: async () => {
       const { refreshToken } = useAuthStore.getState();
       if (refreshToken) {
-        await apiClient.post("/auth/logout/", { refresh: refreshToken }).catch(() => {});
+        await apiClient.post(API_ENDPOINTS.auth.logout, { refresh: refreshToken }).catch(() => {});
       }
     },
     onSuccess: () => {

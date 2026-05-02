@@ -17,7 +17,7 @@ class ContractViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_permissions(self):
-        if self.action == "retrieve" and getattr(self.request.user, 'is_tenant', False):
+        if self.action in ["list", "retrieve"] and getattr(self.request.user, "is_tenant", False):
             return [permissions.IsAuthenticated()]
         return [permissions.IsAuthenticated(), IsLandlordOrAdmin()]
 

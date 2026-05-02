@@ -9,6 +9,7 @@ export interface User {
 }
 
 export type UserRole = "ADMIN" | "LANDLORD" | "TENANT";
+export type RegistrationRole = Exclude<UserRole, "ADMIN">;
 
 export interface LoginRequest {
   username: string;
@@ -27,5 +28,17 @@ export interface RegisterRequest {
   password_confirm: string;
   full_name: string;
   phone?: string;
+  role: RegistrationRole;
+}
+
+export interface UserCreateRequest extends Omit<RegisterRequest, "role"> {
   role: UserRole;
+}
+
+export interface UserUpdateRequest {
+  email: string;
+  full_name?: string;
+  phone?: string;
+  role: UserRole;
+  is_active: boolean;
 }

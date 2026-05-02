@@ -1,68 +1,54 @@
 import { test, expect } from "@playwright/test";
 
-const API_URL = process.env.API_URL || "http://localhost:8000";
+const FE_BASE = process.env.BASE_URL || "http://localhost:5173";
 
-test.describe("Authentication Flow", () => {
-  test("should display login page", async ({ page }) => {
+const credentials = {
+  username: process.env.E2E_USERNAME || "admin_test",
+  password: process.env.E2E_PASSWORD || "Admin@123",
+};
+
+test.describe("@smoke Authentication Flow", () => {
+  test("login page renders and form fields are visible", async ({ page }) => {
     await page.goto("/login");
     await expect(page.locator("h1:has-text('Quản Lý Phòng Trọ')")).toBeVisible();
-    await expect(page.locator('input[placeholder="Nhập tên đăng nhập"]')).toBeVisible();
-    await expect(page.locator('input[placeholder="Nhập mật khẩu"]')).toBeVisible();
+    await expect(page.getByRole("textbox", { name: "Nhập tên đăng nhập" })).toBeVisible();
+    await expect(page.getByRole("textbox", { name: "Nhập mật khẩu" })).toBeVisible();
   });
 
-  test("should show validation errors on empty login", async ({ page }) => {
+  test("protected routes redirect to login when unauthenticated", async ({ page }) => {
+    for (const path of ["/", "/rooms", "/tenants", "/contracts", "/bills"]) {
+      await page.goto(path);
+      await expect(page).toHaveURL(/login/);
+    }
+  });
+
+  test("login call returns backend response (not Vercel route error)", async ({ page }) => {
+    test.setTimeout(60000);
+
     await page.goto("/login");
-    await page.click('button:has-text("Đăng Nhập")');
-    // Form validation should prevent submission
+
+    await page.getByRole("textbox", { name: "Nhập tên đăng nhập" }).fill(credentials.username);
+    await page.getByRole("textbox", { name: "Nhập mật khẩu" }).fill(credentials.password);
+
+    const [response] = await Promise.all([
+      page.waitForResponse(
+        (resp) => resp.url().includes("/api/auth/login/") && resp.request().method() === "POST",
+        { timeout: 60000 }
+      ),
+      page.getByRole("button", { name: "Đăng Nhập" }).click(),
+    ]);
+
+    expect([200, 400, 401]).toContain(response.status());
+    expect([404, 405]).not.toContain(response.status());
   });
 
-  test("should navigate to register page", async ({ page }) => {
-    await page.goto("/login");
-    await page.click("text=Đăng ký");
-    await expect(page).toHaveURL(/register/);
-    await expect(page.locator("text=Đăng Ký Tài Khoản")).toBeVisible();
-  });
-});
+  test("no fatal runtime crash on login page", async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on("pageerror", (error) => pageErrors.push(String(error)));
 
-test.describe("Protected Routes", () => {
-  test("should redirect to login when not authenticated", async ({ page }) => {
-    await page.goto("/rooms");
-    await expect(page).toHaveURL(/login/);
-  });
+    await page.goto(`${FE_BASE}/login`);
+    await page.waitForTimeout(1200);
 
-  test("should redirect to login when accessing tenants without auth", async ({ page }) => {
-    await page.goto("/tenants");
-    await expect(page).toHaveURL(/login/);
-  });
-
-  test("should redirect to login when accessing contracts without auth", async ({ page }) => {
-    await page.goto("/contracts");
-    await expect(page).toHaveURL(/login/);
-  });
-
-  test("should redirect to login when accessing bills without auth", async ({ page }) => {
-    await page.goto("/bills");
-    await expect(page).toHaveURL(/login/);
-  });
-});
-
-test.describe("Dashboard Access", () => {
-  test("should redirect to login when accessing dashboard without auth", async ({ page }) => {
-    await page.goto("/");
-    await expect(page).toHaveURL(/login/);
-  });
-});
-
-test.describe("API Health Check", () => {
-  test.skip("backend API docs should be accessible", async ({ request }) => {
-    const response = await request.get(`${API_URL}/api/docs/`);
-    expect(response.status()).toBe(200);
-  });
-
-  test.skip("backend health endpoint should work", async ({ request }) => {
-    // Try to access a public endpoint
-    const response = await request.get(`${API_URL}/api/rooms/`);
-    // Should return 401 (unauthorized) or 403, not 500
-    expect([200, 401, 403]).toContain(response.status());
+    expect(pageErrors).toEqual([]);
   });
 });

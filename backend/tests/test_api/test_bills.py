@@ -25,6 +25,16 @@ class TestBillList:
         assert response.status_code == 200
         assert response.data["count"] == 1
 
+    def test_list_bills_as_tenant_scoped_to_self(self, tenant_client, tenant_user, tenant, bill):
+        """Tenant can list their own bills."""
+        tenant.user = tenant_user
+        tenant.save()
+
+        response = tenant_client.get("/api/bills/")
+
+        assert response.status_code == 200
+        assert response.data["count"] == 1
+
     def test_list_bills_unauthenticated(self, api_client, bill):
         """Unauthenticated user cannot list bills."""
         response = api_client.get("/api/bills/")
@@ -85,7 +95,7 @@ class TestBillCreate:
         assert "total_amount" in response.data or response.data.get("room_price") is not None
 
     def test_create_bill_as_tenant(self, tenant_client, contract, room, tenant):
-        """Tenant may or may not be blocked depending on view permissions."""
+        """Tenant cannot create bills."""
         data = {
             "contract": contract.id,
             "room": room.id,
@@ -97,8 +107,7 @@ class TestBillCreate:
         }
         response = tenant_client.post("/api/bills/", data)
 
-        # Accept either 403 (blocked) or 201 (allowed - bill gets linked to tenant's landlord)
-        assert response.status_code in [201, 403]
+        assert response.status_code == 403
 
 
 @pytest.mark.django_db
@@ -147,6 +156,20 @@ class TestBillPay:
         response = landlord_client.post(f"/api/bills/{bill.id}/pay/", data)
 
         assert response.status_code in [200, 201, 204]
+
+    def test_pay_bill_as_tenant(self, tenant_client, tenant_user, tenant, bill):
+        """Tenant can pay their own bill."""
+        tenant.user = tenant_user
+        tenant.save()
+        data = {
+            "amount": str(bill.total_amount),
+            "payment_method": "TRANSFER",
+            "payment_date": str(date.today()),
+        }
+
+        response = tenant_client.post(f"/api/bills/{bill.id}/pay/", data)
+
+        assert response.status_code == 201
 
 
 @pytest.mark.django_db

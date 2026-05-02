@@ -28,6 +28,36 @@ class TestUserRegistration:
         assert response.data["email"] == "newuser@test.com"
         assert response.data["role"] == "TENANT"
 
+    def test_public_register_can_create_landlord(self, api_client):
+        """Test public registration still supports landlord onboarding."""
+        data = {
+            "username": "newlandlord",
+            "email": "newlandlord@test.com",
+            "password": "password123",
+            "password_confirm": "password123",
+            "full_name": "New Landlord",
+            "role": "LANDLORD",
+        }
+        response = api_client.post("/api/auth/register/", data)
+
+        assert response.status_code == 201
+        assert response.data["role"] == "LANDLORD"
+
+    def test_public_register_cannot_create_admin(self, api_client):
+        """Test unauthenticated registration cannot escalate to admin."""
+        data = {
+            "username": "newadmin",
+            "email": "newadmin@test.com",
+            "password": "password123",
+            "password_confirm": "password123",
+            "full_name": "New Admin",
+            "role": "ADMIN",
+        }
+        response = api_client.post("/api/auth/register/", data)
+
+        assert response.status_code == 400
+        assert not User.objects.filter(username="newadmin").exists()
+
     def test_register_user_password_mismatch(self, api_client):
         """Test registration with mismatched passwords."""
         data = {
@@ -168,5 +198,20 @@ class TestTokenRefresh:
         response = api_client.post("/api/auth/refresh/", {
             "refresh": "invalid_token",
         })
+
+        assert response.status_code == 401
+
+
+@pytest.mark.django_db
+class TestLogout:
+    """Test logout endpoint used by the frontend."""
+
+    def test_logout_authenticated(self, landlord_client):
+        response = landlord_client.post("/api/auth/logout/", {"refresh": "client-side"})
+
+        assert response.status_code == 204
+
+    def test_logout_unauthenticated(self, api_client):
+        response = api_client.post("/api/auth/logout/", {})
 
         assert response.status_code == 401

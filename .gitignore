@@ -103,3 +103,12 @@ task_board_*.md
 # Test
 .pytest_cache/
 .tox/
+
+.vercel
+.omx/
+.serena/
+frontend/playwright-report/
+frontend/test-results/
+frontend/tsconfig.tsbuildinfo
+login-page.png
+register-page.png

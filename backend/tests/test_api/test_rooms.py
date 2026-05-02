@@ -24,11 +24,16 @@ class TestRoomList:
         assert response.data["count"] == 1
         assert response.data["results"][0]["room_number"] == "101"
 
-    def test_list_rooms_as_tenant(self, tenant_client, room):
-        """Tenant cannot list rooms."""
+    def test_list_rooms_as_tenant_scoped_to_current_room(self, tenant_client, tenant_user, tenant, room):
+        """Tenant can list their current room only."""
+        tenant.user = tenant_user
+        tenant.save()
+
         response = tenant_client.get("/api/rooms/")
 
-        assert response.status_code == 403
+        assert response.status_code == 200
+        assert response.data["count"] == 1
+        assert response.data["results"][0]["id"] == room.id
 
     def test_list_rooms_unauthenticated(self, api_client, room):
         """Unauthenticated user cannot list rooms."""

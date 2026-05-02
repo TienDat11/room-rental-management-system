@@ -24,11 +24,16 @@ class TestTenantList:
         assert response.status_code == 200
         assert response.data["count"] == 1
 
-    def test_list_tenants_as_tenant_blocked(self, tenant_client, tenant):
-        """Tenant without linked profile gets 403 on list."""
+    def test_list_tenants_as_tenant_scoped_to_self(self, tenant_client, tenant_user, tenant):
+        """Tenant can list their linked profile only."""
+        tenant.user = tenant_user
+        tenant.save()
+
         response = tenant_client.get("/api/tenants/")
 
-        assert response.status_code == 403
+        assert response.status_code == 200
+        assert response.data["count"] == 1
+        assert response.data["results"][0]["id"] == tenant.id
 
 
 @pytest.mark.django_db

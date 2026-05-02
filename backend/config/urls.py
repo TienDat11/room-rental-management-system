@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from apps.bills.views import DashboardSummaryView, OccupancyReportView, RevenueReportView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -9,6 +10,9 @@ urlpatterns = [
     path("api/tenants/", include("apps.tenants.urls")),
     path("api/contracts/", include("apps.contracts.urls")),
     path("api/bills/", include("apps.bills.urls")),
+    path("api/reports/revenue/", RevenueReportView.as_view(), name="report-revenue"),
+    path("api/reports/occupancy/", OccupancyReportView.as_view(), name="report-occupancy"),
+    path("api/dashboard/summary/", DashboardSummaryView.as_view(), name="dashboard-summary"),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
         "api/docs/",

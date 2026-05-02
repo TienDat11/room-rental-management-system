@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { InternalAxiosRequestConfig } from "axios";
+import { normalizeApiBaseUrl } from "@/shared/constants/api";
+import { STORAGE_KEYS } from "@/shared/constants/storage";
 
 describe("API Client Integration", () => {
   beforeEach(() => {
@@ -21,30 +23,40 @@ describe("API Client Integration", () => {
       },
       version: 0,
     };
-    localStorage.setItem("auth-storage", JSON.stringify(authData));
+    localStorage.setItem(STORAGE_KEYS.auth, JSON.stringify(authData));
 
-    const stored = JSON.parse(localStorage.getItem("auth-storage")!);
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.auth)!);
     expect(stored.state.accessToken).toBe("test-token-123");
     expect(stored.state.refreshToken).toBe("test-refresh-456");
   });
 
   it("should handle missing auth-storage gracefully", () => {
-    expect(localStorage.getItem("auth-storage")).toBeNull();
+    expect(localStorage.getItem(STORAGE_KEYS.auth)).toBeNull();
   });
 
   it("should handle corrupted auth-storage gracefully", () => {
-    localStorage.setItem("auth-storage", "{invalid-json");
+    localStorage.setItem(STORAGE_KEYS.auth, "{invalid-json");
     try {
-      JSON.parse(localStorage.getItem("auth-storage")!);
+      JSON.parse(localStorage.getItem(STORAGE_KEYS.auth)!);
     } catch (e) {
       expect(e).toBeInstanceOf(SyntaxError);
     }
   });
 
   it("should clear auth data on logout", () => {
-    localStorage.setItem("auth-storage", JSON.stringify({ state: { accessToken: "token" } }));
-    localStorage.removeItem("auth-storage");
-    expect(localStorage.getItem("auth-storage")).toBeNull();
+    localStorage.setItem(STORAGE_KEYS.auth, JSON.stringify({ state: { accessToken: "token" } }));
+    localStorage.removeItem(STORAGE_KEYS.auth);
+    expect(localStorage.getItem(STORAGE_KEYS.auth)).toBeNull();
+  });
+});
+
+describe("API base URL configuration", () => {
+  it("should default to Vite proxy path when env is missing", () => {
+    expect(normalizeApiBaseUrl()).toBe("/api");
+  });
+
+  it("should trim trailing slashes from configured API base URL", () => {
+    expect(normalizeApiBaseUrl("https://api.example.com///")).toBe("https://api.example.com");
   });
 });
 

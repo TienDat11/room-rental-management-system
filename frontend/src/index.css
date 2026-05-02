@@ -39,3 +39,59 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #a1a1a1;
 }
+
+.auth-page {
+  min-height: 100vh;
+}
+
+.auth-panel {
+  min-width: 0;
+}
+
+.auth-register-panel {
+  max-height: 100vh;
+}
+
+@media (max-height: 760px) and (min-width: 901px) {
+  .auth-register-panel {
+    justify-content: flex-start !important;
+    padding-top: 24px !important;
+    padding-bottom: 24px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .auth-page {
+    flex-direction: column;
+    min-height: auto !important;
+  }
+
+  .auth-hero {
+    flex: none !important;
+    min-height: auto;
+    padding: 32px 24px !important;
+  }
+
+  .auth-panel {
+    flex: none !important;
+    width: 100%;
+    padding: 28px 20px 36px !important;
+  }
+
+  .auth-register-panel {
+    max-height: none;
+    overflow: visible !important;
+  }
+
+  .auth-feature-list,
+  .auth-steps {
+    display: none !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .auth-form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+  }
+}
